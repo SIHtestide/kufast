@@ -6,7 +6,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
-	"k8s.io/client-go/util/homedir"
 	"kufast/tools"
 	"os"
 )
@@ -20,32 +19,20 @@ container (provided one exists) and execute commands in the context of your cont
 will start an interactive CLI Session. To leave the container and get back to your normal
 command line type "exit".`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var kubeLoc string
+
 		var ns string
 		var command string
-
-		//Populate kubeconfig location
-		kubeLoc, _ = cmd.Flags().GetString("kubeconfig")
-		if kubeLoc == "" {
-			kubeLoc = homedir.HomeDir() + "/.kube/config"
-		}
 
 		//Populate and set the command to be executed
 		command, _ = cmd.Flags().GetString("command")
 
 		//Populate namespace field
-		ns, err := cmd.Flags().GetString("namespace")
+		ns, err := tools.GetNamespaceFromUserConfig(cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
-		if ns == "" {
-			ns, err = tools.GetNamespaceFromUserConfig(kubeLoc)
-			if err != nil {
-				tools.HandleError(err, cmd)
-			}
-		}
 
-		clientset, config, err := tools.GetUserClient(kubeLoc)
+		clientset, config, err := tools.GetUserClient(cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
