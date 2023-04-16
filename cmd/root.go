@@ -31,7 +31,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "$HOME/.kube/config", "Your kubeconfig to access the cluster")
+	rootCmd.PersistentFlags().StringP("kubeconfig", "k", "", "Your kubeconfig to access the cluster. If not provided, we read it from $HOME/.kube/config")
 	rootCmd.PersistentFlags().StringP("namespace", "n", "", "Namespace for the operation, defaults to the namespace of the default-context in your kubeconfig.")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

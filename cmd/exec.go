@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
+	"k8s.io/client-go/util/homedir"
 	"os"
 )
 
@@ -26,6 +27,9 @@ command line type "exit".`,
 
 		//Populate kubeconfig location
 		kubeLoc, _ = cmd.Flags().GetString("kubeconfig")
+		if kubeLoc == "" {
+			kubeLoc = homedir.HomeDir() + "/.kube/config"
+		}
 
 		//Populate the command to be executed
 		command, _ = cmd.Flags().GetString("command")
@@ -47,17 +51,24 @@ command line type "exit".`,
 				fmt.Println(err)
 				_ = cmd.Help()
 				os.Exit(1)
+			} else if cfg.Contexts[cfg.CurrentContext] != nil {
+				ns = cfg.Contexts[cfg.CurrentContext].Namespace
+			} else {
+				fmt.Println("Config not found or bad format.\n")
+				_ = cmd.Help()
+				os.Exit(1)
 			}
-			ns = cfg.Contexts[cfg.CurrentContext].Namespace
 		}
 
+		//Check that exactly one arg has been provided (the pod)
 		if len(args) != 1 {
-			fmt.Println("Too few or too many arguments provided.")
+			fmt.Println("Too few or too many arguments provided.\n")
 			_ = cmd.Help()
 			os.Exit(1)
 		}
 
 		config, err := clientcmd.BuildConfigFromFlags("", kubeLoc)
+
 		if err != nil {
 			fmt.Println(err)
 			_ = cmd.Help()
