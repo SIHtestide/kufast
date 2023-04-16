@@ -62,7 +62,7 @@ This command will fail, if you do not have admin rights on the cluster.`,
 
 		pw := progress.NewWriter()
 		pw.SetNumTrackersExpected(2)
-		pw.SetMessageWidth(25)
+		pw.SetMessageWidth(100)
 		pw.SetUpdateFrequency(time.Millisecond * 250)
 		go pw.Render()
 		go trackerFactory.NewCreateNamespaceTracker(newSpace, newQuota, clientset, pw)

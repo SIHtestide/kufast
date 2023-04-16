@@ -19,26 +19,32 @@ func NewCreateNamespaceTracker(namespace *v1.Namespace, quota *v1.ResourceQuota,
 	_, err := clientset.CoreV1().Namespaces().Create(context.TODO(), namespace, metav1.CreateOptions{})
 	if err != nil {
 		tracker.MarkAsErrored()
+		tracker2.MarkAsErrored()
 		tracker.Message = err.Error()
+		tracker2.Message = "Failed because of previous error"
 	}
 
 	for true {
 		newNamespace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespace.ObjectMeta.Name, metav1.GetOptions{})
 		if err != nil {
 			tracker.MarkAsErrored()
+			tracker2.MarkAsErrored()
 			tracker.Message = err.Error()
+			tracker2.Message = "Failed because of previous error"
 		}
-		if newNamespace.Status.Phase == "Active" {
+		if newNamespace.Status.Phase == "Active" && !tracker.IsErrored() {
 			tracker.MarkAsDone()
 			break
 		}
 		time.Sleep(time.Millisecond * 250)
 	}
-	_, err = clientset.CoreV1().ResourceQuotas(namespace.ObjectMeta.Name).Create(context.TODO(), quota, metav1.CreateOptions{})
-	if err != nil {
-		tracker2.MarkAsErrored()
-		tracker2.Message = err.Error()
-	}
 
-	tracker2.MarkAsDone()
+	if !tracker.IsErrored() {
+		_, err = clientset.CoreV1().ResourceQuotas(namespace.ObjectMeta.Name).Create(context.TODO(), quota, metav1.CreateOptions{})
+		if err != nil {
+			tracker2.MarkAsErrored()
+			tracker2.Message = err.Error()
+		}
+		tracker2.MarkAsDone()
+	}
 }
