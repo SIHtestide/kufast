@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"fmt"
+	"errors"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/client-go/util/homedir"
+	"kufast/tools"
 	"os"
 )
 
@@ -31,56 +30,29 @@ command line type "exit".`,
 			kubeLoc = homedir.HomeDir() + "/.kube/config"
 		}
 
-		//Populate the command to be executed
+		//Populate and set the command to be executed
 		command, _ = cmd.Flags().GetString("command")
 
 		//Populate namespace field
 		ns, err := cmd.Flags().GetString("namespace")
 		if err != nil {
-			fmt.Println(err)
-			_ = cmd.Help()
-			os.Exit(1)
+			tools.HandleError(err, cmd)
+		}
+		if ns == "" {
+			ns, err = tools.GetNamespaceFromUserConfig(kubeLoc)
+			if err != nil {
+				tools.HandleError(err, cmd)
+			}
 		}
 
-		//Check if we need to load ns from the config
-		if ns == "" {
-			loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-			loadingRules.Precedence[0] = kubeLoc
-			cfg, err := loadingRules.Load()
-			if err != nil {
-				fmt.Println(err)
-				_ = cmd.Help()
-				os.Exit(1)
-			} else if cfg.Contexts[cfg.CurrentContext] != nil {
-				ns = cfg.Contexts[cfg.CurrentContext].Namespace
-			} else {
-				fmt.Println("Config not found or bad format.\n")
-				_ = cmd.Help()
-				os.Exit(1)
-			}
+		clientset, config, err := tools.GetUserClient(kubeLoc)
+		if err != nil {
+			tools.HandleError(err, cmd)
 		}
 
 		//Check that exactly one arg has been provided (the pod)
 		if len(args) != 1 {
-			fmt.Println("Too few or too many arguments provided.\n")
-			_ = cmd.Help()
-			os.Exit(1)
-		}
-
-		config, err := clientcmd.BuildConfigFromFlags("", kubeLoc)
-
-		if err != nil {
-			fmt.Println(err)
-			_ = cmd.Help()
-			os.Exit(1)
-		}
-
-		// create the clientset
-		clientset, err := kubernetes.NewForConfig(config)
-		if err != nil {
-			fmt.Println(err)
-			_ = cmd.Help()
-			os.Exit(1)
+			tools.HandleError(errors.New("Too few or too many arguments provided."), cmd)
 		}
 
 		//Set the command
@@ -106,8 +78,7 @@ command line type "exit".`,
 
 		exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			tools.HandleError(err, cmd)
 		}
 		err = exec.Stream(remotecommand.StreamOptions{
 			Stdin:  os.Stdin,
@@ -115,9 +86,7 @@ command line type "exit".`,
 			Stderr: os.Stderr,
 		})
 		if err != nil {
-			fmt.Println(err)
-			_ = cmd.Help()
-			os.Exit(1)
+			tools.HandleError(err, cmd)
 		}
 	},
 }
