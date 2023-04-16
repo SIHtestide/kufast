@@ -29,7 +29,7 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
+	createCmd.PersistentFlags().BoolP("interactive", "i", false, "Start interactive mode for the creation of this object.")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
