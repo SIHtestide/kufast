@@ -92,7 +92,7 @@ command line type "exit".`,
 }
 
 func init() {
-	rootCmd.AddCommand(execCmd)
+	RootCmd.AddCommand(execCmd)
 
 	// Here you will define your flags and configuration settings.
 	execCmd.Flags().StringP("command", "c", "/bin/sh", "Set the command to be exec")
