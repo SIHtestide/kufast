@@ -18,7 +18,7 @@ Write multiple names to create multiple namespaces at once. This command will fa
 			args = createNamespaceInteractive(cmd, args)
 		}
 
-		objectsCreated := len(args) * 2
+		objectsCreated := len(args)
 		pw := trackerFactory.CreateProgressWriter(objectsCreated)
 		for _, ns := range args {
 			go trackerFactory.NewCreateNamespaceTracker(ns, cmd, pw)
@@ -40,6 +40,10 @@ func init() {
 	// is called directly, e.g.:
 	createNamespaceCmd.Flags().StringP("limit-memory", "m", "4Gi", "Limit the RAM usage for this namespace")
 	createNamespaceCmd.Flags().StringP("limit-cpu", "c", "2", "Limit the CPU usage for this namespace")
+	createNamespaceCmd.Flags().StringArrayP("users", "u", []string{}, "Usernames to create along with the namespace")
+	createNamespaceCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
+	createNamespaceCmd.MarkFlagsRequiredTogether("output", "users")
+	_ = createNamespaceCmd.MarkFlagDirname("output")
 }
 
 func createNamespaceInteractive(cmd *cobra.Command, args []string) []string {
