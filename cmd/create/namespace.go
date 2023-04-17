@@ -1,12 +1,9 @@
 package create
 
 import (
-	"bufio"
-	"fmt"
 	"github.com/spf13/cobra"
+	"kufast/tools"
 	"kufast/trackerFactory"
-	"os"
-	"strings"
 )
 
 // createCmd represents the create command
@@ -47,31 +44,18 @@ func init() {
 
 func createNamespaceInteractive(cmd *cobra.Command, args []string) []string {
 	if len(args) == 0 {
-		reader := bufio.NewReader(os.Stdin)
 		for true {
-			fmt.Println("What should be the name for the new namespace?")
-			fmt.Print(">>")
-			answer, _ := reader.ReadString('\n')
-			answer = strings.TrimSuffix(answer, "\n")
-			args = append(args, answer)
-			fmt.Println("Do you want to add another namespace (yes/no)?")
-			fmt.Print(">>")
-			answer, _ = reader.ReadString('\n')
-			answer = strings.TrimSuffix(answer, "\n")
-			if answer != "yes" {
+			namespaceName := tools.GetDialogAnswer("What should be the name for the new namespace?")
+			args = append(args, namespaceName)
+			continueNamespaces := tools.GetDialogAnswer("Do you want to add another namespace (yes/no)?")
+			if continueNamespaces != "yes" {
 				break
 			}
 		}
-		fmt.Println("Which CPU limit do you want to set for the namespace(es)? (e.g. 1, 500m)")
-		fmt.Print(">>")
-		answer, _ := reader.ReadString('\n')
-		answer = strings.TrimSuffix(answer, "\n")
-		cmd.Flags().Set("limit-cpu", answer)
-		fmt.Println("Which Memory limit do you want to set for the namespace(es)? (e.g. 100Mi, 5Gi)")
-		fmt.Print(">>")
-		answer, _ = reader.ReadString('\n')
-		answer = strings.TrimSuffix(answer, "\n")
-		cmd.Flags().Set("limit-memory", answer)
+		limitCpu := tools.GetDialogAnswer("Which CPU limit do you want to set for the namespace(es)? (e.g. 1, 500m)")
+		_ = cmd.Flags().Set("limit-cpu", limitCpu)
+		limitMemory := tools.GetDialogAnswer("Which Memory limit do you want to set for the namespace(es)? (e.g. 100Mi, 5Gi)")
+		_ = cmd.Flags().Set("limit-memory", limitMemory)
 
 	}
 	return args
