@@ -3,20 +3,29 @@ package trackerFactory
 import (
 	"context"
 	"github.com/jedib0t/go-pretty/v6/progress"
-	v1 "k8s.io/api/core/v1"
+	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	"kufast/objectFactory"
+	"kufast/tools"
 	"time"
 )
 
-func NewCreateNamespaceTracker(namespace *v1.Namespace, quota *v1.ResourceQuota, clientset *kubernetes.Clientset, pw progress.Writer) {
+func NewCreateNamespaceTracker(namespaceName string, cmd *cobra.Command, pw progress.Writer) {
 
-	tracker := progress.Tracker{Message: "Create Namespace", Total: 1, Units: progress.UnitsDefault}
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		tools.HandleError(err, cmd)
+	}
+
+	ram, _ := cmd.Flags().GetString("limit-memory")
+	cpu, _ := cmd.Flags().GetString("limit-cpu")
+
+	tracker := progress.Tracker{Message: "Create Namespace..", Total: 1, Units: progress.UnitsDefault}
 	pw.AppendTracker(&tracker)
-	tracker2 := progress.Tracker{Message: "Create Limits", Total: 1, Units: progress.UnitsDefault}
+	tracker2 := progress.Tracker{Message: "Create Limits..", Total: 1, Units: progress.UnitsDefault}
 	pw.AppendTracker(&tracker2)
 
-	_, err := clientset.CoreV1().Namespaces().Create(context.TODO(), namespace, metav1.CreateOptions{})
+	_, err = clientset.CoreV1().Namespaces().Create(context.TODO(), objectFactory.NewNamespace(namespaceName), metav1.CreateOptions{})
 	if err != nil {
 		tracker.MarkAsErrored()
 		tracker2.MarkAsErrored()
@@ -25,7 +34,7 @@ func NewCreateNamespaceTracker(namespace *v1.Namespace, quota *v1.ResourceQuota,
 	}
 
 	for true {
-		newNamespace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespace.ObjectMeta.Name, metav1.GetOptions{})
+		newNamespace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), namespaceName, metav1.GetOptions{})
 		if err != nil {
 			tracker.MarkAsErrored()
 			tracker2.MarkAsErrored()
@@ -33,6 +42,7 @@ func NewCreateNamespaceTracker(namespace *v1.Namespace, quota *v1.ResourceQuota,
 			tracker2.Message = "Failed because of previous error"
 		}
 		if newNamespace.Status.Phase == "Active" && !tracker.IsErrored() {
+			tracker.SetValue(1)
 			tracker.MarkAsDone()
 			break
 		}
@@ -40,11 +50,12 @@ func NewCreateNamespaceTracker(namespace *v1.Namespace, quota *v1.ResourceQuota,
 	}
 
 	if !tracker.IsErrored() {
-		_, err = clientset.CoreV1().ResourceQuotas(namespace.ObjectMeta.Name).Create(context.TODO(), quota, metav1.CreateOptions{})
+		_, err = clientset.CoreV1().ResourceQuotas(namespaceName).Create(context.TODO(), objectFactory.NewResourceQuota(namespaceName, ram, cpu), metav1.CreateOptions{})
 		if err != nil {
 			tracker2.MarkAsErrored()
 			tracker2.Message = err.Error()
 		}
+		tracker2.SetValue(1)
 		tracker2.MarkAsDone()
 	}
 }
