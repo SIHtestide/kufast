@@ -20,7 +20,7 @@ func NewCreateNamespaceTracker(namespaceName string, cmd *cobra.Command, pw prog
 	ram, _ := cmd.Flags().GetString("limit-memory")
 	cpu, _ := cmd.Flags().GetString("limit-cpu")
 
-	tracker := progress.Tracker{Message: "Create Namespace base objects..", Total: 1, Units: progress.UnitsDefault}
+	tracker := progress.Tracker{Message: "Create Namespace base objects..", Total: 3, Units: progress.UnitsDefault}
 	pw.AppendTracker(&tracker)
 
 	_, err = clientset.CoreV1().Namespaces().Create(context.TODO(), objectFactory.NewNamespace(namespaceName), metav1.CreateOptions{})
@@ -59,9 +59,39 @@ func NewCreateNamespaceTracker(namespaceName string, cmd *cobra.Command, pw prog
 		tracker.SetValue(3)
 		tracker.MarkAsDone()
 
+		users, _ := cmd.Flags().GetStringArray("users")
+		for _, user := range users {
+			go NewCreateUserTracker(namespaceName, user, cmd, pw)
+		}
+
 	}
 }
 
-func NewCreateUserTracker(namespaceName string, cmd *cobra.Command, pw progress.Writer) {
-	
+func NewCreateUserTracker(namespaceName string, userName string, cmd *cobra.Command, pw progress.Writer) {
+	clientset, client, err := tools.GetUserClient(cmd)
+	if err != nil {
+		tools.HandleError(err, cmd)
+	}
+
+	tracker := progress.Tracker{Message: "Create User and Role Binding..", Total: 3, Units: progress.UnitsDefault}
+	pw.AppendTracker(&tracker)
+
+	_, err = clientset.CoreV1().ServiceAccounts(namespaceName).Create(context.TODO(), objectFactory.NewUser(userName, namespaceName), metav1.CreateOptions{})
+	if err != nil {
+		tracker.MarkAsErrored()
+		tracker.Message = err.Error()
+	}
+	tracker.SetValue(1)
+	_, err = clientset.RbacV1().RoleBindings(namespaceName).Create(context.TODO(), objectFactory.NewRoleBinding(userName, namespaceName), metav1.CreateOptions{})
+	if err != nil {
+		tracker.MarkAsErrored()
+		tracker.Message = err.Error()
+	}
+
+	tracker.SetValue(2)
+	out, _ := cmd.Flags().GetString("output")
+	tools.WriteNewUserYamlToFile(userName, namespaceName, client, clientset, out, tracker)
+	tracker.SetValue(3)
+	tracker.MarkAsDone()
+
 }

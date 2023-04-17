@@ -5,7 +5,6 @@ import (
 	v12 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 func NewNamespace(name string) *v1.Namespace {
@@ -107,7 +106,6 @@ func NewRoleBinding(userName string, namespaceName string) *v12.RoleBinding {
 		Subjects: []v12.Subject{
 			{
 				Kind:      "ServiceAccount",
-				APIGroup:  "rbac.authorization.k8s.io",
 				Name:      userName,
 				Namespace: namespaceName,
 			},
@@ -118,9 +116,5 @@ func NewRoleBinding(userName string, namespaceName string) *v12.RoleBinding {
 			Name:     namespaceName + "-user",
 		},
 	}
-
-}
-
-func NewUserYaml(name string, namespace string, clientset *kubernetes.Clientset) {
 
 }

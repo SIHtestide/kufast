@@ -17,8 +17,8 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		if isInteractive {
 			args = createNamespaceInteractive(cmd, args)
 		}
-
-		objectsCreated := len(args)
+		users, _ := cmd.Flags().GetStringArray("users")
+		objectsCreated := len(args) * len(users)
 		pw := trackerFactory.CreateProgressWriter(objectsCreated)
 		for _, ns := range args {
 			go trackerFactory.NewCreateNamespaceTracker(ns, cmd, pw)
