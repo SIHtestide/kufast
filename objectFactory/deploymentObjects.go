@@ -7,7 +7,7 @@ import (
 )
 
 func NewPod(podName string, imageName string, nodeName string, namespaceName string,
-	attachedSecrets map[string]string, cpu string, ram string, shouldRestart bool) *v1.Pod {
+	attachedSecrets []string, cpu string, ram string, shouldRestart bool) *v1.Pod {
 
 	var newPod *v1.Pod
 	newPod = &v1.Pod{
@@ -26,7 +26,7 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 			NodeName: nodeName,
 			Containers: []v1.Container{
 				{
-					Name:  podName,
+					Name:  imageName,
 					Image: imageName,
 					Resources: v1.ResourceRequirements{
 						Limits:   v1.ResourceList{},
@@ -57,7 +57,7 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 		newPod.Spec.RestartPolicy = v1.RestartPolicyAlways
 	}
 
-	for secretName, key := range attachedSecrets {
+	for _, secretName := range attachedSecrets {
 		newPod.Spec.Containers[0].Env = append(newPod.Spec.Containers[0].Env, v1.EnvVar{
 			Name: secretName,
 			ValueFrom: &v1.EnvVarSource{
@@ -65,7 +65,7 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 					LocalObjectReference: v1.LocalObjectReference{
 						Name: secretName,
 					},
-					Key: key,
+					Key: "key",
 				},
 			},
 		})
