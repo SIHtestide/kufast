@@ -6,9 +6,9 @@ import (
 )
 
 // getCmd represents the get command
-var getUserCmd = &cobra.Command{
-	Use:   "get",
-	Short: "A brief description of your command",
+var getLogsCmd = &cobra.Command{
+	Use:   "get logs <podname>",
+	Short: "Get the logs of a pod",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -21,7 +21,7 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	getCmd.AddCommand(getUserCmd)
+	getCmd.AddCommand(getLogsCmd)
 
 	// Here you will define your flags and configuration settings.
 
