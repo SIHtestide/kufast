@@ -1,9 +1,12 @@
 package create
 
 import (
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"kufast/tools"
 	"kufast/trackerFactory"
+	"os"
+	"time"
 )
 
 // createCmd represents the create command
@@ -17,13 +20,21 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		if isInteractive {
 			args = createNamespaceInteractive(cmd, args)
 		}
-		users, _ := cmd.Flags().GetStringArray("users")
-		objectsCreated := len(args) * len(users)
-		pw := trackerFactory.CreateProgressWriter(objectsCreated)
+		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		s.Prefix = "Creating Objects - Please wait!  "
+		s.Start()
+		var createOps []<-chan int32
+		var results []int32
+
 		for _, ns := range args {
-			go trackerFactory.NewCreateNamespaceTracker(ns, cmd, pw)
+			createOps = append(createOps, trackerFactory.NewCreateNamespaceTracker(ns, cmd, s))
 		}
-		trackerFactory.HandleTracking(pw, objectsCreated)
+		//Ensure all operations are done
+		for _, op := range createOps {
+			results = append(results, <-op)
+		}
+		s.Stop()
+
 	},
 }
 

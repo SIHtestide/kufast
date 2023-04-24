@@ -1,27 +1,45 @@
 package get
 
 import (
-	"fmt"
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
+	"kufast/tools"
+	"os"
+	"time"
 )
 
-// getCmd represents the get command
 var getUserCredsCmd = &cobra.Command{
-	Use:   "user-creds",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "user-creds <user>..",
+	Short: "Generate user credentials for specific users.",
+	Long:  `Generate User credentials for specific user. Can only be used by admins.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("get called")
+		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
+
+		clientset, client, err := tools.GetUserClient(cmd)
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
+
+		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		s.Prefix = "Creating Objects - Please wait!  "
+		s.Start()
+		var writeOps []<-chan int32
+		var results []int32
+		for _, user := range args {
+			writeOps = append(writeOps, tools.WriteNewUserYamlToFile(user, namespaceName, client, clientset, cmd, s))
+		}
+		//Ensure all operations are done
+		for _, op := range writeOps {
+			results = append(results, <-op)
+		}
+		s.Stop()
 	},
 }
 
 func init() {
 	getCmd.AddCommand(getUserCredsCmd)
+	getUserCredsCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
+	getUserCredsCmd.MarkFlagRequired("output")
 
 	// Here you will define your flags and configuration settings.
 

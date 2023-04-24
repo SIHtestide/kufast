@@ -1,8 +1,11 @@
 package create
 
 import (
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"kufast/trackerFactory"
+	"os"
+	"time"
 )
 
 // createCmd represents the create command
@@ -16,12 +19,13 @@ You can customize your deployment with the flags below or by using the interacti
 		if isInteractive {
 			args = createPodInteractive(cmd, args)
 		}
+		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		s.Prefix = "Creating Objects - Please wait!  "
+		s.Start()
 
-		objectsCreated := 1
-		pw := trackerFactory.CreateProgressWriter(objectsCreated)
-		go trackerFactory.NewCreatePodTracker(cmd, pw, args)
-
-		trackerFactory.HandleTracking(pw, objectsCreated)
+		res := trackerFactory.NewCreatePodTracker(cmd, s, args)
+		_ = <-res
+		s.Stop()
 
 	},
 }

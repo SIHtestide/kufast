@@ -1,9 +1,12 @@
 package create
 
 import (
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"kufast/tools"
 	"kufast/trackerFactory"
+	"os"
+	"time"
 )
 
 // createCmd represents the create command
@@ -20,17 +23,28 @@ on the cluster.`,
 		}
 		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
 
-		objectsCreated := len(args)
-		pw := trackerFactory.CreateProgressWriter(objectsCreated)
+		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		s.Prefix = "Creating Objects - Please wait!  "
+		s.Start()
+		var createOps []<-chan int32
+		var results []int32
+
 		for _, user := range args {
-			go trackerFactory.NewCreateUserTracker(namespaceName, user, cmd, pw)
+			createOps = append(createOps, trackerFactory.NewCreateUserTracker(namespaceName, user, cmd, s))
 		}
+		//Ensure all operations are done
+		for _, op := range createOps {
+			results = append(results, <-op)
+		}
+		s.Stop()
 	},
 }
 
 func init() {
 	createCmd.AddCommand(createUserCmd)
 
+	createUserCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
+	createUserCmd.MarkFlagRequired("output")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

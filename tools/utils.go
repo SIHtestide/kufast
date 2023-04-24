@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/jedib0t/go-pretty/v6/progress"
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -30,46 +30,68 @@ func GetDialogAnswer(question string) string {
 	return answer
 }
 
-func WriteNewUserYamlToFile(name string, namespaceName string, clientConfig *rest.Config, clientset *kubernetes.Clientset, out string, tracker progress.Tracker) {
+func WriteNewUserYamlToFile(userName string, namespaceName string, clientConfig *rest.Config, clientset *kubernetes.Clientset, cmd *cobra.Command, s *spinner.Spinner) <-chan int32 {
+	r := make(chan int32)
 
-	user, err := clientset.CoreV1().ServiceAccounts(namespaceName).Get(context.TODO(), name, metav1.GetOptions{})
-	if err != nil {
-		fmt.Println(err)
-	}
+	go func() {
+		defer close(r)
+		user, errUser := clientset.CoreV1().ServiceAccounts(namespaceName).Get(context.TODO(), userName, metav1.GetOptions{})
+		if errUser != nil {
+			r <- 1
+			s.Stop()
+			fmt.Println(errUser.Error())
+			s.Start()
+			return
+		}
+		secret, errSecret := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), user.Secrets[0].Name, metav1.GetOptions{})
+		if errSecret != nil {
+			r <- 1
+			s.Stop()
+			fmt.Println(errSecret)
+			s.Start()
+			return
+		}
 
-	secret, err := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), user.Secrets[0].Name, metav1.GetOptions{})
-	if err != nil {
-		fmt.Println(err)
-	}
+		out, _ := cmd.Flags().GetString("output")
 
-	newConfig := api.Config{
-		Kind:       "Config",
-		APIVersion: "v1",
-		Clusters: map[string]*api.Cluster{
-			"default-cluster": {
-				Server:                   clientConfig.Host,
-				CertificateAuthorityData: secret.Data["ca.crt"],
+		newConfig := api.Config{
+			Kind:       "Config",
+			APIVersion: "v1",
+			Clusters: map[string]*api.Cluster{
+				"default-cluster": {
+					Server:                   clientConfig.Host,
+					CertificateAuthorityData: secret.Data["ca.crt"],
+				},
 			},
-		},
-		AuthInfos: map[string]*api.AuthInfo{
-			name: {
-				Token: string(secret.Data["token"]),
+			AuthInfos: map[string]*api.AuthInfo{
+				userName: {
+					Token: string(secret.Data["token"]),
+				},
 			},
-		},
-		Contexts: map[string]*api.Context{
-			"default-context": {
-				Cluster:   "default-cluster",
-				Namespace: namespaceName,
-				AuthInfo:  name,
+			Contexts: map[string]*api.Context{
+				"default-context": {
+					Cluster:   "default-cluster",
+					Namespace: namespaceName,
+					AuthInfo:  userName,
+				},
 			},
-		},
-		CurrentContext: "default-context",
-	}
+			CurrentContext: "default-context",
+		}
 
-	err = clientcmd.WriteToFile(newConfig, out+"/"+name+"-"+namespaceName+".kubeconfig")
-	if err != nil {
-		tracker.UpdateMessage("Unable to write config: " + err.Error())
-		tracker.MarkAsErrored()
-	}
-
+		err := clientcmd.WriteToFile(newConfig, out+"/"+userName+"-"+namespaceName+".kubeconfig")
+		if err != nil {
+			s.Stop()
+			fmt.Println("Unable to write config: " + err.Error())
+			s.Start()
+			r <- 1
+			return
+		} else {
+			s.Stop()
+			fmt.Println("Config for user " + userName + " in namespace " + namespaceName + "written.")
+			s.Start()
+			r <- 0
+			return
+		}
+	}()
+	return r
 }
