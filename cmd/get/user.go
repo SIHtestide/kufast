@@ -7,7 +7,7 @@ import (
 
 // getCmd represents the get command
 var getUserCmd = &cobra.Command{
-	Use:   "get",
+	Use:   "user",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:

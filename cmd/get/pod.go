@@ -1,35 +1,65 @@
 package get
 
 import (
-	"fmt"
+	"context"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/tools"
+	"os"
 )
 
 // getCmd represents the get command
 var getPodCmd = &cobra.Command{
-	Use:   "get",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "pod <pod>",
+	Short: "Gain information about a deployed pod.",
+	Long:  `Gain information about a deployed pod.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("get called")
+		//Initial config block
+		ns, err := tools.GetNamespaceFromUserConfig(cmd)
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
+
+		clientset, _, err := tools.GetUserClient(cmd)
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
+
+		//execute request
+		pod, err := clientset.CoreV1().Pods(ns).Get(context.TODO(), args[0], metav1.GetOptions{})
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
+
+		cpuLim, _ := pod.Spec.Containers[0].Resources.Limits["cpu"].MarshalJSON()
+		cpuReq, _ := pod.Spec.Containers[0].Resources.Requests["cpu"].MarshalJSON()
+		memLim, _ := pod.Spec.Containers[0].Resources.Limits["memory"].MarshalJSON()
+		memReq, _ := pod.Spec.Containers[0].Resources.Requests["memory"].MarshalJSON()
+
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{"ATTRIBUTE", "VALUE"})
+		t.AppendRow(table.Row{"Name", pod.Name})
+		t.AppendRow(table.Row{"Namespace", pod.Namespace})
+		t.AppendRow(table.Row{"Status", pod.Status.Phase})
+		t.AppendSeparator()
+		t.AppendRow(table.Row{"CPU-Limit", "Limit: " + string(cpuLim) +
+			"\nRequests: " + string(cpuReq)})
+		t.AppendSeparator()
+		t.AppendRow(table.Row{"Memory-Limit", "Limit: " + string(memLim) +
+			"\nRequests: " + string(memReq)})
+		t.AppendSeparator()
+		t.AppendRow(table.Row{"Attached Storage", "None / to be implemented"})
+		t.AppendRow(table.Row{"Deployed Image", pod.Spec.Containers[0].Image})
+		t.AppendRow(table.Row{"Restart Policy", pod.Spec.RestartPolicy})
+
+		t.AppendSeparator()
+		t.Render()
+
 	},
 }
 
 func init() {
-	getPodCmd.AddCommand(getCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	getCmd.AddCommand(getPodCmd)
 }

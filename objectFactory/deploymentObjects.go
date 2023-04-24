@@ -26,8 +26,9 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 			NodeName: nodeName,
 			Containers: []v1.Container{
 				{
-					Name:  imageName,
-					Image: imageName,
+					Name:    imageName,
+					Image:   imageName,
+					Command: []string{"/bin/sleep", "3650d"},
 					Resources: v1.ResourceRequirements{
 						Limits:   v1.ResourceList{},
 						Requests: v1.ResourceList{},

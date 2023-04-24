@@ -7,7 +7,7 @@ import (
 
 // getCmd represents the get command
 var getLogsCmd = &cobra.Command{
-	Use:   "get logs <podname>",
+	Use:   "logs <podname>",
 	Short: "Get the logs of a pod",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
