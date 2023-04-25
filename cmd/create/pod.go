@@ -1,6 +1,7 @@
 package create
 
 import (
+	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"kufast/asyncOps"
@@ -26,6 +27,7 @@ You can customize your deployment with the flags below or by using the interacti
 		res := asyncOps.NewCreatePodTracker(cmd, s, args)
 		_ = <-res
 		s.Stop()
+		fmt.Println("Complete!")
 
 	},
 }
