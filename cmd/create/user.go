@@ -3,8 +3,8 @@ package create
 import (
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
+	"kufast/asyncOps"
 	"kufast/tools"
-	"kufast/trackerFactory"
 	"os"
 	"time"
 )
@@ -30,7 +30,7 @@ on the cluster.`,
 		var results []int32
 
 		for _, user := range args {
-			createOps = append(createOps, trackerFactory.NewCreateUserTracker(namespaceName, user, cmd, s))
+			createOps = append(createOps, asyncOps.CreateUser(namespaceName, user, cmd, s))
 		}
 		//Ensure all operations are done
 		for _, op := range createOps {

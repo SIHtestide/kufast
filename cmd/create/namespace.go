@@ -1,10 +1,11 @@
 package create
 
 import (
+	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
+	"kufast/asyncOps"
 	"kufast/tools"
-	"kufast/trackerFactory"
 	"os"
 	"time"
 )
@@ -27,13 +28,14 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		var results []int32
 
 		for _, ns := range args {
-			createOps = append(createOps, trackerFactory.NewCreateNamespaceTracker(ns, cmd, s))
+			createOps = append(createOps, asyncOps.CreateNamespace(ns, cmd, s))
 		}
 		//Ensure all operations are done
 		for _, op := range createOps {
 			results = append(results, <-op)
 		}
 		s.Stop()
+		fmt.Println("Done!")
 
 	},
 }

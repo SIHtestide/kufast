@@ -1,4 +1,4 @@
-package trackerFactory
+package asyncOps
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func NewCreateNamespaceTracker(namespaceName string, cmd *cobra.Command, s *spinner.Spinner) <-chan int32 {
+func CreateNamespace(namespaceName string, cmd *cobra.Command, s *spinner.Spinner) <-chan int32 {
 	r := make(chan int32)
 
 	go func() {
@@ -67,7 +67,7 @@ func NewCreateNamespaceTracker(namespaceName string, cmd *cobra.Command, s *spin
 		var createOps []<-chan int32
 		var results []int32
 		for _, user := range users {
-			createOps = append(createOps, NewCreateUserTracker(namespaceName, user, cmd, s))
+			createOps = append(createOps, CreateUser(namespaceName, user, cmd, s))
 		}
 		//Ensure all operations are done
 		for _, op := range createOps {
@@ -79,7 +79,7 @@ func NewCreateNamespaceTracker(namespaceName string, cmd *cobra.Command, s *spin
 
 }
 
-func NewCreateUserTracker(namespaceName string, userName string, cmd *cobra.Command, s *spinner.Spinner) <-chan int32 {
+func CreateUser(namespaceName string, userName string, cmd *cobra.Command, s *spinner.Spinner) <-chan int32 {
 	r := make(chan int32)
 
 	go func() {
