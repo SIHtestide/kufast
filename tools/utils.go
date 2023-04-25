@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -13,6 +14,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd/api"
 	"os"
 	"strings"
+	"syscall"
 )
 
 func HandleError(err error, cmd *cobra.Command) {
@@ -28,6 +30,13 @@ func GetDialogAnswer(question string) string {
 	answer, _ := reader.ReadString('\n')
 	answer = strings.TrimSuffix(answer, "\n")
 	return answer
+}
+
+func GetPasswordAnswer(question string) string {
+	fmt.Println(question)
+	fmt.Print(">>")
+	password, _ := term.ReadPassword(int(syscall.Stdin))
+	return strings.TrimSpace(string(password))
 }
 
 func WriteNewUserYamlToFile(userName string, namespaceName string, clientConfig *rest.Config, clientset *kubernetes.Clientset, cmd *cobra.Command, s *spinner.Spinner) <-chan int32 {

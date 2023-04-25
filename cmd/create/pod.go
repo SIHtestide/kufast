@@ -24,7 +24,7 @@ You can customize your deployment with the flags below or by using the interacti
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
 
-		res := asyncOps.NewCreatePodTracker(cmd, s, args)
+		res := asyncOps.NewPod(cmd, s, args)
 		_ = <-res
 		s.Stop()
 		fmt.Println("Complete!")

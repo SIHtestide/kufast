@@ -76,7 +76,7 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 
 }
 
-func NewSecret(namespaceName string, secretName string, secretData map[string]string) *v1.Secret {
+func NewSecret(namespaceName string, secretName string, secretData string) *v1.Secret {
 	return &v1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -86,7 +86,26 @@ func NewSecret(namespaceName string, secretName string, secretData map[string]st
 			Name:      secretName,
 			Namespace: namespaceName,
 		},
-		StringData: secretData,
-		Type:       "Opaque",
+		StringData: map[string]string{
+			"secret": secretData,
+		},
+		Type: "Opaque",
+	}
+}
+
+func NewDeploymentSecret(namespaceName string, secretName string, secretDataBase64 string) *v1.Secret {
+	return &v1.Secret{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Secret",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secretName,
+			Namespace: namespaceName,
+		},
+		StringData: map[string]string{
+			".dockerconfigjson": secretDataBase64,
+		},
+		Type: "kubernetes.io/dockerconfigjson",
 	}
 }

@@ -115,7 +115,7 @@ func CreateUser(namespaceName string, userName string, cmd *cobra.Command, s *sp
 	return r
 }
 
-func NewCreatePodTracker(cmd *cobra.Command, s *spinner.Spinner, args []string) <-chan int32 {
+func NewPod(cmd *cobra.Command, s *spinner.Spinner, args []string) <-chan int32 {
 	r := make(chan int32)
 
 	go func() {
