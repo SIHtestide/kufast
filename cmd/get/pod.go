@@ -16,7 +16,7 @@ var getPodCmd = &cobra.Command{
 	Long:  `Gain information about a deployed pod.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//Initial config block
-		ns, err := tools.GetNamespaceFromUserConfig(cmd)
+		namespaceName, err := tools.GetNamespaceFromUserConfig(cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
@@ -27,7 +27,7 @@ var getPodCmd = &cobra.Command{
 		}
 
 		//execute request
-		pod, err := clientset.CoreV1().Pods(ns).Get(context.TODO(), args[0], metav1.GetOptions{})
+		pod, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), args[0], metav1.GetOptions{})
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
