@@ -2,7 +2,6 @@ package create
 
 import (
 	"context"
-	b64 "encoding/base64"
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
@@ -15,7 +14,7 @@ import (
 
 // createCmd represents the create command
 var createDeploySecretCmd = &cobra.Command{
-	Use:   "secret name",
+	Use:   "deploy-secret name",
 	Short: "Create a new environment secret in this namespace",
 	Long: `This command creates a new user and adds him to a namespace. You can select the namespace of the user.
 Upon completion, the command yields the users credentials. This command will fail, if you do not have admin rights 
@@ -30,19 +29,22 @@ on the cluster.`,
 		fileName, _ := cmd.Flags().GetString("input")
 
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = "Deleting Objects - Please wait!  "
+		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
 
-		buf, err := os.ReadFile(fileName)
+		creds, err := os.ReadFile(fileName)
 		if err != nil {
 			s.Stop()
 			tools.HandleError(err, cmd)
 		}
 
-		credentials := b64.StdEncoding.EncodeToString(buf)
-		deploymentSecretObject := objectFactory.NewDeploymentSecret(namespaceName, args[0], credentials)
+		deploymentSecretObject := objectFactory.NewDeploymentSecret(namespaceName, args[0], creds)
 
-		clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), deploymentSecretObject, v1.CreateOptions{})
+		_, err = clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), deploymentSecretObject, v1.CreateOptions{})
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
 
 		s.Stop()
 		fmt.Println("Complete!")
@@ -53,7 +55,7 @@ on the cluster.`,
 func init() {
 	createCmd.AddCommand(createDeploySecretCmd)
 
-	createDeploySecretCmd.Flags().StringP("input", "i", "", "Path to your .dockerfile to read credentials from.")
+	createDeploySecretCmd.Flags().StringP("input", "", "", "Path to your .dockerfile to read credentials from.")
 	createDeploySecretCmd.MarkFlagRequired("input")
 	createDeploySecretCmd.MarkFlagFilename("input", "json")
 	// Here you will define your flags and configuration settings.

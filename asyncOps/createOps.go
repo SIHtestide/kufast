@@ -127,15 +127,16 @@ func NewPod(cmd *cobra.Command, s *spinner.Spinner, args []string) <-chan int32 
 			s.Start()
 		}
 
-		ram, _ := cmd.Flags().GetString("limit-memory")
-		cpu, _ := cmd.Flags().GetString("limit-cpu")
+		ram, _ := cmd.Flags().GetString("memory")
+		cpu, _ := cmd.Flags().GetString("cpu")
 		keepAlive, _ := cmd.Flags().GetBool("keep-alive")
 		node, _ := cmd.Flags().GetString("target")
 		secrets, _ := cmd.Flags().GetStringArray("secrets")
+		deploySecret, _ := cmd.Flags().GetString("deploy-secret")
 
 		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
 
-		podObject := objectFactory.NewPod(args[0], args[1], node, namespaceName, secrets, cpu, ram, keepAlive)
+		podObject := objectFactory.NewPod(args[0], args[1], node, namespaceName, secrets, deploySecret, cpu, ram, keepAlive)
 
 		_, err2 := clientset.CoreV1().Pods(namespaceName).Create(context.TODO(), podObject, metav1.CreateOptions{})
 		if err2 != nil {

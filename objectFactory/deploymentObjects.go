@@ -7,7 +7,7 @@ import (
 )
 
 func NewPod(podName string, imageName string, nodeName string, namespaceName string,
-	attachedSecrets []string, cpu string, ram string, shouldRestart bool) *v1.Pod {
+	attachedSecrets []string, deploySecret string, cpu string, ram string, shouldRestart bool) *v1.Pod {
 
 	var newPod *v1.Pod
 	newPod = &v1.Pod{
@@ -26,7 +26,7 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 			NodeName: nodeName,
 			Containers: []v1.Container{
 				{
-					Name:    imageName,
+					Name:    podName,
 					Image:   imageName,
 					Command: []string{"/bin/sleep", "3650d"},
 					Resources: v1.ResourceRequirements{
@@ -66,10 +66,18 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 					LocalObjectReference: v1.LocalObjectReference{
 						Name: secretName,
 					},
-					Key: "key",
+					Key: "secret",
 				},
 			},
 		})
+	}
+
+	if deploySecret != "" {
+		newPod.Spec.ImagePullSecrets = []v1.LocalObjectReference{
+			{
+				Name: deploySecret,
+			},
+		}
 	}
 
 	return newPod
@@ -93,7 +101,7 @@ func NewSecret(namespaceName string, secretName string, secretData string) *v1.S
 	}
 }
 
-func NewDeploymentSecret(namespaceName string, secretName string, secretDataBase64 string) *v1.Secret {
+func NewDeploymentSecret(namespaceName string, secretName string, secretDataBase64 []byte) *v1.Secret {
 	return &v1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Secret",
@@ -103,7 +111,7 @@ func NewDeploymentSecret(namespaceName string, secretName string, secretDataBase
 			Name:      secretName,
 			Namespace: namespaceName,
 		},
-		StringData: map[string]string{
+		Data: map[string][]byte{
 			".dockerconfigjson": secretDataBase64,
 		},
 		Type: "kubernetes.io/dockerconfigjson",

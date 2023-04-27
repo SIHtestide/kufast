@@ -30,12 +30,12 @@ on the cluster.`,
 		//Get the namespace
 		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
 
+		//Get the secret
+		secretData := tools.GetPasswordAnswer("Enter your secret here:")
+
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
-
-		//Get the secret
-		secretData := tools.GetPasswordAnswer("Enter your secret here:")
 
 		//create secret object
 		secretObject := objectFactory.NewSecret(namespaceName, args[0], secretData)

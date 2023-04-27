@@ -18,7 +18,7 @@ import (
 )
 
 func HandleError(err error, cmd *cobra.Command) {
-	fmt.Println(err)
+	fmt.Println("\n\n" + err.Error() + "\n\n")
 	_ = cmd.Help()
 	os.Exit(1)
 }
