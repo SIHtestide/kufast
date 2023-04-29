@@ -38,9 +38,9 @@ var listNodesCmd = &cobra.Command{
 					strCond = strCond + string(condition.Type) + ", "
 				}
 			}
+
 			strCond = strings.TrimSuffix(strCond, ", ")
 			t.AppendRow(table.Row{node.Name, strCond, node.Status.Capacity.Cpu().String(), node.Status.Capacity.Memory().String()})
-
 		}
 		t.AppendSeparator()
 		t.Render()

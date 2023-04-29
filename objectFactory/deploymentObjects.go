@@ -7,7 +7,7 @@ import (
 )
 
 func NewPod(podName string, imageName string, nodeName string, namespaceName string,
-	attachedSecrets []string, deploySecret string, cpu string, ram string, shouldRestart bool) *v1.Pod {
+	attachedSecrets []string, deploySecret string, cpu string, ram string, storage string, shouldRestart bool) *v1.Pod {
 
 	var newPod *v1.Pod
 	newPod = &v1.Pod{
@@ -54,6 +54,15 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 			newPod.Spec.Containers[0].Resources.Requests["cpu"] = qty
 		}
 	}
+
+	if storage != "" {
+		qty, err := resource.ParseQuantity(storage)
+		if err == nil {
+			newPod.Spec.Containers[0].Resources.Limits["ephemeral-storage"] = qty
+			newPod.Spec.Containers[0].Resources.Requests["ephemeral-storage"] = qty
+		}
+	}
+
 	if shouldRestart {
 		newPod.Spec.RestartPolicy = v1.RestartPolicyAlways
 	}

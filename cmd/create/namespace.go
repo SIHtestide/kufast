@@ -51,8 +51,11 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	createNamespaceCmd.Flags().StringP("limit-memory", "m", "4Gi", "Limit the RAM usage for this namespace")
-	createNamespaceCmd.Flags().StringP("limit-cpu", "c", "2", "Limit the CPU usage for this namespace")
+	createNamespaceCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for this namespace")
+	createNamespaceCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
+	createNamespaceCmd.Flags().StringP("pods", "", "1", "Limit the Number of pods that can be created in this namespace")
+	createNamespaceCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage in this namespace")
+	createNamespaceCmd.Flags().StringP("storage-min", "", "1Gi", "Set the amount of storage, each pod must consume")
 	createNamespaceCmd.Flags().StringArrayP("users", "u", []string{}, "Usernames to create along with the namespace")
 	createNamespaceCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
 	createNamespaceCmd.MarkFlagsRequiredTogether("output", "users")

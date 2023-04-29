@@ -24,7 +24,7 @@ You can customize your deployment with the flags below or by using the interacti
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
 
-		res := asyncOps.NewPod(cmd, s, args)
+		res := asyncOps.CreatePod(cmd, s, args)
 		_ = <-res
 		s.Stop()
 		fmt.Println("Complete!")
@@ -38,6 +38,7 @@ func init() {
 	createPodCmd.Flags().BoolP("keep-alive", "", false, "Pod will be restarted upon termination.")
 	createPodCmd.Flags().StringP("memory", "", "500Mi", "Limit the RAM usage for this namespace")
 	createPodCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
+	createPodCmd.Flags().StringP("storage", "", "1Gi", "The amount of storage the pod can use")
 	createPodCmd.Flags().StringP("target", "t", "", "The name of the node to deploy the pod")
 	createPodCmd.Flags().StringP("deploy-secret", "d", "", "The name of the deployment secret to deploy this container.")
 	createPodCmd.Flags().StringArrayP("secrets", "s", []string{}, "List of secret names to be introduced in the container as environment variables. The name equals the name of the secret")

@@ -54,3 +54,41 @@ func DeleteUser(userName string, cmd *cobra.Command, s *spinner.Spinner) <-chan 
 	}()
 	return r
 }
+
+func DeleteSecret(secretName string, cmd *cobra.Command, s *spinner.Spinner) <-chan int32 {
+	r := make(chan int32)
+
+	go func() {
+		defer close(r)
+
+		clientset, _, err := tools.GetUserClient(cmd)
+		if err != nil {
+			r <- 1
+			s.Stop()
+			fmt.Println(err.Error())
+			s.Start()
+		}
+
+		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
+
+		err = clientset.CoreV1().Secrets(namespaceName).Delete(context.TODO(), secretName, v1.DeleteOptions{})
+		if err != nil {
+			r <- 1
+			s.Stop()
+			fmt.Println(err.Error())
+			s.Start()
+		}
+
+		for true {
+			_, err := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), secretName, v1.GetOptions{})
+			if err != nil {
+				r <- 0
+				break
+			}
+			time.Sleep(time.Millisecond * 250)
+		}
+		r <- 0
+
+	}()
+	return r
+}
