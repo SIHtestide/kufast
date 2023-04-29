@@ -32,8 +32,8 @@ var updateNamespaceCmd = &cobra.Command{
 			tools.HandleError(err, cmd)
 		}
 
-		//Get Current Namespace to verify it is present
-		_, err = clientset.CoreV1().Namespaces().Get(context.TODO(), args[0], metav1.GetOptions{})
+		//Get Current Namespace
+		namespace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), args[0], metav1.GetOptions{})
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
@@ -44,12 +44,28 @@ var updateNamespaceCmd = &cobra.Command{
 			tools.HandleError(err, cmd)
 		}
 
+		//Get Networkpolicy for namespace
+		nps, err := clientset.NetworkingV1().NetworkPolicies(args[0]).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
+
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
 
 		ram, _ := cmd.Flags().GetString("memory")
 		cpu, _ := cmd.Flags().GetString("cpu")
+		tenant, _ := cmd.Flags().GetString("tenant")
+		target, _ := cmd.Flags().GetString("target")
+
+		namespace.Labels["tenant"] = tenant
+		if namespace.ObjectMeta.Annotations == nil {
+			//No annotations have been provided, need to create them
+			annotations := map[string]string{}
+			namespace.ObjectMeta.Annotations = annotations
+		}
+		namespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "target=" + target
 
 		if ram != "" {
 			qty, err := resource.ParseQuantity(ram)
@@ -66,6 +82,18 @@ var updateNamespaceCmd = &cobra.Command{
 			}
 		}
 
+		if len(nps.Items) == 0 {
+			//Keine Policy, erstelle Policy
+			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Create(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenant), metav1.CreateOptions{})
+		} else if len(nps.Items) == 1 {
+			//Update Policy
+			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Update(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenant), metav1.UpdateOptions{})
+		} else {
+			s.Stop()
+			fmt.Println("More than one Network policy detected! ignoring..")
+			s.Start()
+		}
+
 		//Create current role scheme to update namespace
 		role := objectFactory.NewRole(args[0])
 
@@ -80,6 +108,13 @@ var updateNamespaceCmd = &cobra.Command{
 			s.Stop()
 			tools.HandleError(err, cmd)
 		}
+
+		_, err = clientset.CoreV1().Namespaces().Update(context.TODO(), namespace, metav1.UpdateOptions{})
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
+
 		s.Stop()
 		fmt.Println("Complete!")
 
@@ -91,5 +126,6 @@ func init() {
 
 	updateNamespaceCmd.Flags().StringP("memory", "", "4Gi", "Limit the RAM usage for this namespace")
 	updateNamespaceCmd.Flags().StringP("cpu", "", "2", "Limit the CPU usage for this namespace")
-
+	updateNamespaceCmd.Flags().StringP("target", "", "", "Deployment target for the namespace. Can be specified multiple times. Leave empty, for all targets")
+	updateNamespaceCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
 }

@@ -27,8 +27,10 @@ func CreateNamespace(namespaceName string, cmd *cobra.Command, s *spinner.Spinne
 		storage, _ := cmd.Flags().GetString("storage")
 		minStorage, _ := cmd.Flags().GetString("storage-min")
 		pods, _ := cmd.Flags().GetString("pods")
+		tenant, _ := cmd.Flags().GetString("tenant")
+		target, _ := cmd.Flags().GetString("target")
 
-		_, err = clientset.CoreV1().Namespaces().Create(context.TODO(), objectFactory.NewNamespace(namespaceName), metav1.CreateOptions{})
+		_, err = clientset.CoreV1().Namespaces().Create(context.TODO(), objectFactory.NewNamespace(namespaceName, target), metav1.CreateOptions{})
 		if err != nil {
 			r <- 1
 			s.Stop()
@@ -67,6 +69,14 @@ func CreateNamespace(namespaceName string, cmd *cobra.Command, s *spinner.Spinne
 		}
 
 		_, err = clientset.CoreV1().LimitRanges(namespaceName).Create(context.TODO(), objectFactory.NewLimitRange(namespaceName, minStorage, storage), metav1.CreateOptions{})
+		if err != nil {
+			r <- 1
+			s.Stop()
+			fmt.Println(err.Error())
+			s.Start()
+		}
+
+		_, err = clientset.NetworkingV1().NetworkPolicies(namespaceName).Create(context.TODO(), objectFactory.NewNetworkPolicy(namespaceName, tenant), metav1.CreateOptions{})
 		if err != nil {
 			r <- 1
 			s.Stop()

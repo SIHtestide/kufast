@@ -54,12 +54,16 @@ func init() {
 	createNamespaceCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for this namespace")
 	createNamespaceCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
 	createNamespaceCmd.Flags().StringP("pods", "", "1", "Limit the Number of pods that can be created in this namespace")
+	createNamespaceCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
 	createNamespaceCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage in this namespace")
 	createNamespaceCmd.Flags().StringP("storage-min", "", "1Gi", "Set the amount of storage, each pod must consume")
 	createNamespaceCmd.Flags().StringArrayP("users", "u", []string{}, "Usernames to create along with the namespace")
+	createNamespaceCmd.Flags().StringP("target", "", "", "Deployment target for the namespace. Can be specified multiple times. Leave empty, for all targets")
 	createNamespaceCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
 	createNamespaceCmd.MarkFlagsRequiredTogether("output", "users")
 	_ = createNamespaceCmd.MarkFlagDirname("output")
+	_ = createNamespaceCmd.MarkFlagRequired("tenant")
+
 }
 
 func createNamespaceInteractive(cmd *cobra.Command, args []string) []string {

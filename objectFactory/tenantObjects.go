@@ -2,12 +2,13 @@ package objectFactory
 
 import (
 	v1 "k8s.io/api/core/v1"
+	n1 "k8s.io/api/networking/v1"
 	v12 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func NewNamespace(name string) *v1.Namespace {
+func NewNamespace(name string, target string) *v1.Namespace {
 	return &v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Namespace",
@@ -15,6 +16,9 @@ func NewNamespace(name string) *v1.Namespace {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
+			Annotations: map[string]string{
+				"scheduler.alpha.kubernetes.io/node-selector": "target=" + target,
+			},
 		},
 		Spec:   v1.NamespaceSpec{},
 		Status: v1.NamespaceStatus{},
@@ -172,6 +176,54 @@ func NewRoleBinding(userName string, namespaceName string) *v12.RoleBinding {
 			Kind:     "Role",
 			Name:     namespaceName + "-user",
 		},
+	}
+
+}
+
+func NewNetworkPolicy(namespaceName string, tenant string) *n1.NetworkPolicy {
+
+	return &n1.NetworkPolicy{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "NetworkPolicy",
+			APIVersion: "networking.k8s.io/v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      namespaceName + "-networkpolicy",
+			Namespace: namespaceName,
+		},
+		Spec: n1.NetworkPolicySpec{
+			PodSelector: metav1.LabelSelector{},
+			Ingress: []n1.NetworkPolicyIngressRule{
+				{
+					From: []n1.NetworkPolicyPeer{
+						{
+							NamespaceSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"tenant": tenant,
+								},
+							},
+						},
+					},
+				},
+			},
+			Egress: []n1.NetworkPolicyEgressRule{
+				{
+					To: []n1.NetworkPolicyPeer{
+						{
+							NamespaceSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"tenant": tenant,
+								},
+							},
+						},
+					},
+				},
+			},
+			PolicyTypes: []n1.PolicyType{
+				"Ingress", "Egress",
+			},
+		},
+		Status: n1.NetworkPolicyStatus{},
 	}
 
 }
