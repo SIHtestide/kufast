@@ -1,28 +1,41 @@
 package objectFactory
 
 import (
+	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	n1 "k8s.io/api/networking/v1"
 	v12 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/tools"
 )
 
-func NewNamespace(name string, target string) *v1.Namespace {
-	return &v1.Namespace{
+func NewNamespace(tenantName string, targetName string, cmd *cobra.Command) *v1.Namespace {
+	var newNamespace *v1.Namespace
+	newNamespace = &v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Namespace",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-			Annotations: map[string]string{
-				"scheduler.alpha.kubernetes.io/node-selector": "target=" + target,
+			Name:        tenantName + "-" + targetName,
+			Annotations: map[string]string{},
+			Labels: map[string]string{
+				"kufast/tenant": tenantName,
 			},
 		},
 		Spec:   v1.NamespaceSpec{},
 		Status: v1.NamespaceStatus{},
 	}
+
+	target := tools.GetTargetFromTargetName(cmd, targetName, true)
+
+	if target.AccessType == "node" {
+		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kubernetes.io/hostname=" + target.Name
+	} else {
+		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kufast/group=" + target.Name
+	}
+	return newNamespace
 }
 
 func NewLimitRange(namespaceName string, minStorage string, storage string) *v1.LimitRange {
@@ -114,15 +127,21 @@ func NewResourceQuota(namespace string, ram string, cpu string, storage string, 
 	return newQuota
 }
 
-func NewUser(name string, namespace string) *v1.ServiceAccount {
+func NewTenantUser(tenant string, namespace string) *v1.ServiceAccount {
 	return &v1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceAccount",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
+			Name:      tenant + "-user",
+			Namespace: "default",
+			Labels: map[string]string{
+				"kufast/tenant":        tenant,
+				"kufast/defaultTarget": "",
+				"kufast/nodeAccess":    "",
+				"kufast/GroupAccess":   "",
+			},
 		},
 	}
 
@@ -135,7 +154,7 @@ func NewRole(namespaceName string) *v12.Role {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      namespaceName + "-user",
+			Name:      namespaceName + "-role",
 			Namespace: namespaceName,
 		},
 		Rules: []v12.PolicyRule{
@@ -149,32 +168,6 @@ func NewRole(namespaceName string) *v12.Role {
 				Verbs:     []string{"get, list"},
 				Resources: []string{"pods/log"},
 			},
-		},
-	}
-
-}
-
-func NewRoleBinding(userName string, namespaceName string) *v12.RoleBinding {
-	return &v12.RoleBinding{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "RoleBinding",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      userName + "-" + namespaceName + "-role-binding",
-			Namespace: namespaceName,
-		},
-		Subjects: []v12.Subject{
-			{
-				Kind:      "ServiceAccount",
-				Name:      userName,
-				Namespace: namespaceName,
-			},
-		},
-		RoleRef: v12.RoleRef{
-			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "Role",
-			Name:     namespaceName + "-user",
 		},
 	}
 
@@ -212,7 +205,7 @@ func NewNetworkPolicy(namespaceName string, tenant string) *n1.NetworkPolicy {
 						{
 							NamespaceSelector: &metav1.LabelSelector{
 								MatchLabels: map[string]string{
-									"tenant": tenant,
+									"kufast/tenant": tenant,
 								},
 							},
 						},
@@ -220,10 +213,35 @@ func NewNetworkPolicy(namespaceName string, tenant string) *n1.NetworkPolicy {
 				},
 			},
 			PolicyTypes: []n1.PolicyType{
-				"Ingress", "Egress",
+				"Ingress",
 			},
 		},
 		Status: n1.NetworkPolicyStatus{},
 	}
 
+}
+
+func NewTenantRolebinding(namespaceName string, tenant string) *v12.RoleBinding {
+	return &v12.RoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "RoleBinding",
+			APIVersion: "rbac.authorization.k8s.io/v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      namespaceName + "-" + tenant + "-binding",
+			Namespace: namespaceName,
+		},
+		Subjects: []v12.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      tenant + "-user",
+				Namespace: "default",
+			},
+		},
+		RoleRef: v12.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "Role",
+			Name:     namespaceName + "-role",
+		},
+	}
 }

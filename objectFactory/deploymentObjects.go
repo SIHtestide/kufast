@@ -6,7 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func NewPod(podName string, imageName string, nodeName string, namespaceName string,
+func NewPod(podName string, imageName string, namespaceName string,
 	attachedSecrets []string, deploySecret string, cpu string, ram string, storage string, shouldRestart bool) *v1.Pod {
 
 	var newPod *v1.Pod
@@ -23,7 +23,6 @@ func NewPod(podName string, imageName string, nodeName string, namespaceName str
 			},
 		},
 		Spec: v1.PodSpec{
-			NodeName: nodeName,
 			Containers: []v1.Container{
 				{
 					Name:    podName,

@@ -8,10 +8,10 @@ import (
 	"time"
 )
 
-var getUserCredsCmd = &cobra.Command{
-	Use:   "user-creds <user>..",
-	Short: "Generate user credentials for specific users.",
-	Long:  `Generate User credentials for specific user. Can only be used by admins.`,
+var getTenantCredsCmd = &cobra.Command{
+	Use:   "tenant-creds <tenant>",
+	Short: "Generate tenant credentials for specific tenant.",
+	Long:  `Generate tenant credentials for specific user. Can only be used by admins.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
 
@@ -23,15 +23,8 @@ var getUserCredsCmd = &cobra.Command{
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
-		var writeOps []<-chan int32
-		var results []int32
-		for _, user := range args {
-			writeOps = append(writeOps, tools.WriteNewUserYamlToFile(user, namespaceName, client, clientset, cmd, s))
-		}
-		//Ensure all operations are done
-		for _, op := range writeOps {
-			results = append(results, <-op)
-		}
+		tools.WriteNewUserYamlToFile(user, namespaceName, client, clientset, cmd, s))
+
 		s.Stop()
 	},
 }

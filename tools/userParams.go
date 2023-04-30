@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+	"strings"
 )
 
 func GetUserClient(cmd *cobra.Command) (*kubernetes.Clientset, *rest.Config, error) {
@@ -31,6 +32,10 @@ func GetUserClient(cmd *cobra.Command) (*kubernetes.Clientset, *rest.Config, err
 
 	return clientset, config, nil
 
+}
+
+func GetTenantFromNamespace(namespaceName string) string {
+	return strings.Split(namespaceName, ("-"))[0]
 }
 
 func GetNamespaceFromUserConfig(cmd *cobra.Command) (string, error) {

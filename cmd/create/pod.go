@@ -39,7 +39,8 @@ func init() {
 	createPodCmd.Flags().StringP("memory", "", "500Mi", "Limit the RAM usage for this namespace")
 	createPodCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
 	createPodCmd.Flags().StringP("storage", "", "1Gi", "The amount of storage the pod can use")
-	createPodCmd.Flags().StringP("target", "t", "", "The name of the node to deploy the pod")
+	createPodCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	createPodCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 	createPodCmd.Flags().StringP("deploy-secret", "d", "", "The name of the deployment secret to deploy this container.")
 	createPodCmd.Flags().StringArrayP("secrets", "s", []string{}, "List of secret names to be introduced in the container as environment variables. The name equals the name of the secret")
 }

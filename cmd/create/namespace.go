@@ -1,5 +1,6 @@
 package create
 
+/*
 import (
 	"fmt"
 	"github.com/briandowns/spinner"
@@ -84,3 +85,4 @@ func createNamespaceInteractive(cmd *cobra.Command, args []string) []string {
 	}
 	return args
 }
+*/
