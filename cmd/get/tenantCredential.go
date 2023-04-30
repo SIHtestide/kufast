@@ -13,8 +13,6 @@ var getTenantCredsCmd = &cobra.Command{
 	Short: "Generate tenant credentials for specific tenant.",
 	Long:  `Generate tenant credentials for specific user. Can only be used by admins.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
-
 		clientset, client, err := tools.GetUserClient(cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
@@ -23,16 +21,16 @@ var getTenantCredsCmd = &cobra.Command{
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
-		tools.WriteNewUserYamlToFile(user, namespaceName, client, clientset, cmd, s))
+		tools.WriteNewUserYamlToFile(args[0], client, clientset, cmd, s)
 
 		s.Stop()
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getUserCredsCmd)
-	getUserCredsCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
-	getUserCredsCmd.MarkFlagRequired("output")
+	getCmd.AddCommand(getTenantCredsCmd)
+	getTenantCredsCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
+	getTenantCredsCmd.MarkFlagRequired("output")
 
 	// Here you will define your flags and configuration settings.
 

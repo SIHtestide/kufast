@@ -39,15 +39,15 @@ func GetPasswordAnswer(question string) string {
 	return strings.TrimSpace(string(password))
 }
 
-func WriteNewUserYamlToFile(userName string, namespaceName string, clientConfig *rest.Config, clientset *kubernetes.Clientset, cmd *cobra.Command, s *spinner.Spinner) {
+func WriteNewUserYamlToFile(tenantName string, clientConfig *rest.Config, clientset *kubernetes.Clientset, cmd *cobra.Command, s *spinner.Spinner) {
 
-	user, errUser := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), userName, metav1.GetOptions{})
+	tenant, errUser := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
 	if errUser != nil {
 		s.Stop()
 		fmt.Println(errUser)
 		s.Start()
 	}
-	secret, errSecret := clientset.CoreV1().Secrets("default").Get(context.TODO(), user.Secrets[0].Name, metav1.GetOptions{})
+	secret, errSecret := clientset.CoreV1().Secrets("default").Get(context.TODO(), tenant.Secrets[0].Name, metav1.GetOptions{})
 	if errSecret != nil {
 		s.Stop()
 		fmt.Println(errSecret)
@@ -66,28 +66,31 @@ func WriteNewUserYamlToFile(userName string, namespaceName string, clientConfig 
 			},
 		},
 		AuthInfos: map[string]*api.AuthInfo{
-			userName: {
+			tenantName + "-user": {
 				Token: string(secret.Data["token"]),
 			},
 		},
 		Contexts: map[string]*api.Context{
 			"default-context": {
 				Cluster:   "default-cluster",
-				Namespace: namespaceName,
-				AuthInfo:  userName,
+				Namespace: tenantName,
+				AuthInfo:  tenantName + "-user",
 			},
 		},
 		CurrentContext: "default-context",
 	}
+	if tenant.ObjectMeta.Labels["kufast/defaultTarget"] != "" {
+		newConfig.Contexts["default-context"].Namespace = tenantName + "-" + tenant.ObjectMeta.Labels["kufast/defaultTarget"]
+	}
 
-	err := clientcmd.WriteToFile(newConfig, out+"/"+userName+"-"+namespaceName+".kubeconfig")
+	err := clientcmd.WriteToFile(newConfig, out+"/"+tenantName+".kubeconfig")
 	if err != nil {
 		s.Stop()
 		fmt.Println("Unable to write config: " + err.Error())
 		s.Start()
 	} else {
 		s.Stop()
-		fmt.Println("Config for user " + userName + " in namespace " + namespaceName + "written.")
+		fmt.Println("Config for tenant " + tenantName + " written to " + out + "/" + tenantName + ".kubeconfig")
 		s.Start()
 	}
 }

@@ -79,7 +79,7 @@ Write multiple names to create multiple namespaces at once. This command will fa
 			fmt.Println(err)
 			s.Start()
 		}
-		tools.WriteNewUserYamlToFile(user.Name, args[0]+user.ObjectMeta.Labels["kufast/defaultTarget"], clientconfig, clientset, cmd, s)
+		tools.WriteNewUserYamlToFile(args[0], clientconfig, clientset, cmd, s)
 		s.Stop()
 		fmt.Println("Done!")
 	},
