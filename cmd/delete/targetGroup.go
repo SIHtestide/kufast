@@ -3,11 +3,9 @@ package delete
 import (
 	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
+	"kufast/clusterOperations"
 	"kufast/tools"
-	"os"
-	"time"
 )
 
 // deleteCmd represents the delete command
@@ -26,12 +24,10 @@ Please use with care! Deleted data cannot be restored.`,
 		answer := tools.GetDialogAnswer("Targetgroup will be deleted! Spaces with that target group remain intact but are unable to deploy! Continue (yes/No)")
 		if answer == "yes" {
 
-			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-			s.Prefix = "Deleting Objects - Please wait!  "
-			s.Start()
+			s := tools.CreateStandardSpinner(tools.MESSAGE_DELETE_OBJECTS)
 
 			for _, group := range args {
-				err := tools.DeleteTargetGroupFromNodes(group, cmd)
+				err := clusterOperations.DeleteTargetGroupFromNodes(group, cmd)
 				if err != nil {
 					s.Stop()
 					tools.HandleError(err, cmd)
@@ -46,9 +42,9 @@ Please use with care! Deleted data cannot be restored.`,
 }
 
 func init() {
-	deleteCmd.AddCommand(deleteUserCmd)
+	deleteCmd.AddCommand(deleteTargetGroupCmd)
 
-	deleteUserCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	deleteUserCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	deleteTargetGroupCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	deleteTargetGroupCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 
 }

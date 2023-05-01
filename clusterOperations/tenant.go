@@ -36,6 +36,8 @@ func CreateTenant(tenantName string, cmd *cobra.Command) error {
 	return nil
 }
 
+func DeleteTenant
+
 func GetTenantNameFromCmd(cmd *cobra.Command) (string, error) {
 	tenant, _ := cmd.Flags().GetString("tenant")
 	if tenant == "" {

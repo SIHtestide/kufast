@@ -96,7 +96,7 @@ func CreateTenantTarget(tenantName string, targetName string, cmd *cobra.Command
 
 }
 
-func deleteTenantTarget(targetName string, cmd *cobra.Command) <-chan string {
+func DeleteTenantTarget(targetName string, cmd *cobra.Command) <-chan string {
 	res := make(chan string)
 
 	go func() {
@@ -134,7 +134,40 @@ func deleteTenantTarget(targetName string, cmd *cobra.Command) <-chan string {
 
 }
 
-func GetTenantTarget(target string, cmd *cobra.Command) (*v1.Namespace, error) {
+func GetTenantTarget(tenantName string, targetName string, cmd *cobra.Command) (*v1.Namespace, error) {
+
+	//Configblock
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantTarget, err := clientset.CoreV1().Namespaces().Get(context.TODO(), tenantName+"-"+targetName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return tenantTarget, nil
+
+}
+
+func ListTenantTargets(tenantName string, cmd *cobra.Command) ([]*v1.Namespace, error) {
+
+	tenantTargets, err := ListTargetsFromString(cmd, tenantName, false)
+	if err != nil {
+		return nil, err
+	}
+
+	var tenantTargetObjects []*v1.Namespace
+
+	for _, target := range tenantTargets {
+		tenantTarget, err := GetTenantTarget(tenantName, target.Name, cmd)
+		if err != nil {
+			return nil, err
+		}
+		tenantTargetObjects = append(tenantTargetObjects, tenantTarget)
+	}
+
+	return tenantTargetObjects, nil
 
 }
 

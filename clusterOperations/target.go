@@ -20,7 +20,7 @@ func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 		return false
 	}
 
-	targets, err := ListTargets(cmd, all)
+	targets, err := ListTargetsFromCmd(cmd, all)
 	if err != nil {
 		return false
 	}
@@ -33,7 +33,7 @@ func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 }
 
 func GetTargetFromTargetName(cmd *cobra.Command, target string, all bool) (Target, error) {
-	targets, err := ListTargets(cmd, all)
+	targets, err := ListTargetsFromCmd(cmd, all)
 	if err != nil {
 		return Target{}, err
 	}
@@ -45,7 +45,7 @@ func GetTargetFromTargetName(cmd *cobra.Command, target string, all bool) (Targe
 	return Target{}, errors.New("the target does not exist or the tenant has no access to the target")
 }
 
-func ListTargets(cmd *cobra.Command, all bool) ([]Target, error) {
+func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]Target, error) {
 
 	clientset, _, err := tools.GetUserClient(cmd)
 	if err != nil {
@@ -84,30 +84,37 @@ func ListTargets(cmd *cobra.Command, all bool) ([]Target, error) {
 		}
 
 	} else {
-		//Get the information from the tenant
-		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
-		tenant, _ := cmd.Flags().GetString("tenant")
-		if tenant == "" {
-			tenant = tools.GetTenantFromNamespace(namespaceName)
-		}
 
-		user, _ := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenant+"-user", metav1.GetOptions{})
+		user, _ := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
 
 		for key, elem := range user.ObjectMeta.Labels {
-			if strings.Contains("kufast.groupAccess/", key) && elem != "false" {
+			if strings.Contains(tools.KUFAST_TENANT_GROUPACCESS_LABEL, key) && elem == "true" {
 				results = append(results, Target{
-					Name:       strings.TrimPrefix(key, "kufast.groupAccess/"),
+					Name:       strings.TrimPrefix(key, tools.KUFAST_TENANT_GROUPACCESS_LABEL),
 					AccessType: "group",
 				})
-			} else if strings.Contains("kufast.nodeAccess/", key) && elem != "false" {
+			} else if strings.Contains(tools.KUFAST_TENANT_NODEACCESS_LABEL, key) && elem != "false" {
 				results = append(results, Target{
-					Name:       strings.TrimPrefix(key, "kufast.nodeAccess/"),
+					Name:       strings.TrimPrefix(key, tools.KUFAST_TENANT_NODEACCESS_LABEL),
 					AccessType: "node",
 				})
 			}
 		}
 	}
 	return results, nil
+
+}
+
+func ListTargetsFromCmd(cmd *cobra.Command, all bool) ([]Target, error) {
+
+	//Get the information from the tenant
+	namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
+	tenant, _ := cmd.Flags().GetString("tenant")
+	if tenant == "" {
+		tenant = tools.GetTenantFromNamespace(namespaceName)
+	}
+
+	return ListTargetsFromString(cmd, tenant, all)
 
 }
 

@@ -3,12 +3,9 @@ package delete
 import (
 	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"kufast/clusterOperations"
 	"kufast/tools"
-	"os"
-	"time"
 )
 
 // deleteCmd represents the delete command
@@ -27,23 +24,29 @@ Please use with care! Deleted data cannot be restored.`,
 		answer := tools.GetDialogAnswer("Secrets will be deleted! Continue? (No/yes)")
 		if answer == "yes" {
 
-			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-			s.Prefix = "Deleting Objects - Please wait!  "
-			s.Start()
+			s := tools.CreateStandardSpinner(tools.MESSAGE_DELETE_OBJECTS)
 
-			var deleteOps []<-chan int32
-			var results []int32
+			var deleteOps []<-chan string
+			var results []string
 
 			for _, secret := range args {
-				deleteOps = append(deleteOps, clusterOperations.DeleteSecret(secret, cmd, s))
+				deleteOps = append(deleteOps, clusterOperations.DeleteSecret(secret, cmd))
 			}
 
 			for _, op := range deleteOps {
 				results = append(results, <-op)
 			}
 
+			for _, res := range results {
+				if res != "" {
+					s.Stop()
+					fmt.Println(res)
+					s.Start()
+				}
+			}
+
 			s.Stop()
-			fmt.Println("Done!")
+			fmt.Println(tools.MESSAGE_DONE)
 
 		}
 	},
