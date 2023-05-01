@@ -20,17 +20,11 @@ will start an interactive CLI Session. To leave the container and get back to yo
 command line type "exit".`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var ns string
-		var command string
-
 		//Populate and set the command to be executed
-		command, _ = cmd.Flags().GetString("command")
+		command, _ := cmd.Flags().GetString("command")
 
 		//Populate namespace field
-		ns, err := tools.GetNamespaceFromUserConfig(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
+		namespaceName := tools.GetDeploymentNamespace(cmd)
 
 		clientset, config, err := tools.GetUserClient(cmd)
 		if err != nil {
@@ -50,7 +44,7 @@ command line type "exit".`,
 		}
 
 		req := clientset.CoreV1().RESTClient().Post().Resource("pods").Name(args[0]).
-			Namespace(ns).SubResource("exec")
+			Namespace(namespaceName).SubResource("exec")
 		option := &v1.PodExecOptions{
 			Command: comm,
 			Stdin:   true,
@@ -83,6 +77,8 @@ func init() {
 
 	// Here you will define your flags and configuration settings.
 	execCmd.Flags().StringP("command", "c", "/bin/sh", "Set the command to be exec")
+	execCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
+	execCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// execCmd.PersistentFlags().String("foo", "", "A help for foo")

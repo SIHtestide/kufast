@@ -42,6 +42,18 @@ Write multiple names to create multiple namespaces at once. This command will fa
 			tools.HandleError(err, cmd)
 		}
 
+		_, err = clientset.RbacV1().Roles("default").Create(context.TODO(), objectFactory.NewTenantDefaultRole(args[0]), metav1.CreateOptions{})
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
+
+		_, err = clientset.RbacV1().RoleBindings("default").Create(context.TODO(), objectFactory.NewTenantDefaultRoleBinding(args[0]), metav1.CreateOptions{})
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
+
 		//Read targets from Cobra
 		targets, _ := cmd.Flags().GetStringArray("target")
 

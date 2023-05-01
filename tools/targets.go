@@ -2,7 +2,7 @@ package tools
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,25 +49,15 @@ func AddTargetToTenant(cmd *cobra.Command, targetName string, user *v1.ServiceAc
 	if IsValidTarget(cmd, targetName, true) {
 		target := GetTargetFromTargetName(cmd, targetName, true)
 		if target.AccessType == "node" {
-			label := user.ObjectMeta.Labels["kufast/nodeAccess"]
-			if label != "" {
-				user.ObjectMeta.Labels["kufast/nodeAccess"] = label + "_" + targetName
-			} else {
-				user.ObjectMeta.Labels["kufast/nodeAccess"] = targetName
-			}
+			user.ObjectMeta.Labels["kufast.nodeAccess/"+targetName] = "true"
 		} else {
-			label := user.ObjectMeta.Labels["kufast/groupAccess"]
-			if label != "" {
-				user.ObjectMeta.Labels["kufast/groupAccess"] = label + "_" + targetName
-			} else {
-				user.ObjectMeta.Labels["kufast/groupAccess"] = targetName
-			}
+			user.ObjectMeta.Labels["kufast.groupAccess/"+targetName] = "true"
 		}
+	}
 
-		// Populate default label if possible
-		if user.ObjectMeta.Labels["kufast/defaultTarget"] == "" {
-			user.ObjectMeta.Labels["kufast/defaultTarget"] = targetName
-		}
+	// Populate default label if possible
+	if user.ObjectMeta.Labels["kufast/defaultTarget"] == "" {
+		user.ObjectMeta.Labels["kufast/defaultTarget"] = targetName
 	}
 	return user
 }
@@ -89,8 +79,10 @@ func ListTargets(cmd *cobra.Command, all bool) []Target {
 				Name:       node.ObjectMeta.Labels["kubernetes.io/hostname"],
 				AccessType: "node",
 			})
-			if node.ObjectMeta.Labels["kufast/group"] != "" && !slices.Contains(groups, node.Labels["kufast/group"]) {
-				groups = append(groups, node.ObjectMeta.Labels["kufast/group"])
+			for key, elem := range node.ObjectMeta.Labels {
+				if strings.Contains("kufast.group/", key) && elem != "false" && !slices.Contains(groups, strings.TrimPrefix(key, "kufast.group/")) {
+					groups = append(groups, strings.TrimPrefix(key, "kufast.group/"))
+				}
 			}
 		}
 		for _, target := range groups {
@@ -110,27 +102,49 @@ func ListTargets(cmd *cobra.Command, all bool) []Target {
 		}
 
 		user, _ := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenant+"-user", metav1.GetOptions{})
-		nodeTargets := strings.Split(user.ObjectMeta.Labels["kufast/nodeAccess"], "_")
-		groupTargets := strings.Split(user.ObjectMeta.Labels["kufast/groupAccess"], "_")
 
-		for _, target := range nodeTargets {
-			if target != "" {
+		for key, elem := range user.ObjectMeta.Labels {
+			if strings.Contains("kufast.groupAccess/", key) && elem != "false" {
 				results = append(results, Target{
-					Name:       target,
+					Name:       strings.TrimPrefix(key, "kufast.groupAccess/"),
+					AccessType: "group",
+				})
+			} else if strings.Contains("kufast.nodeAccess/", key) && elem != "false" {
+				results = append(results, Target{
+					Name:       strings.TrimPrefix(key, "kufast.nodeAccess/"),
 					AccessType: "node",
 				})
 			}
 		}
-		for _, target := range groupTargets {
-			if target != "" {
-				results = append(results, Target{
-					Name:       target,
-					AccessType: "group",
-				})
-			}
-		}
-		fmt.Println(tenant)
 	}
 	return results
 
+}
+
+func SetTargetGroupToNodes(targetName string, targetNodes []string, cmd *cobra.Command) error {
+	clientset, _, err := GetUserClient(cmd)
+	if err != nil {
+		return errors.New(err.Error())
+	}
+
+	nodeList, err := clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return errors.New(err.Error())
+	}
+
+	if !IsValidTarget(cmd, targetName, true) {
+		for _, node := range nodeList.Items {
+			if slices.Contains(targetNodes, node.Name) {
+				node.Labels["kufast.group/"+targetName] = "true"
+			} else {
+				node.Labels["kufast.group/"+targetName] = "false"
+			}
+			_, err = clientset.CoreV1().Nodes().Update(context.TODO(), &node, metav1.UpdateOptions{})
+			if err != nil {
+				return errors.New(err.Error())
+			}
+		}
+	}
+
+	return nil
 }

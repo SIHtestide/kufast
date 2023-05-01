@@ -245,3 +245,55 @@ func NewTenantRolebinding(namespaceName string, tenant string) *v12.RoleBinding 
 		},
 	}
 }
+
+func NewTenantDefaultRole(tenantName string) *v12.Role {
+	return &v12.Role{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Role",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      tenantName + "-defaultrole",
+			Namespace: tenantName,
+			Labels: map[string]string{
+				"kufast/tenant": tenantName,
+			},
+		},
+		Rules: []v12.PolicyRule{
+			{
+				Verbs:         []string{"get"},
+				Resources:     []string{"ServiceAccount"},
+				ResourceNames: []string{tenantName + "-user"},
+			},
+		},
+	}
+
+}
+
+func NewTenantDefaultRoleBinding(tenantName string) *v12.RoleBinding {
+	return &v12.RoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Role",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      tenantName + "-defaultrole",
+			Namespace: tenantName,
+			Labels: map[string]string{
+				"kufast/tenant": tenantName,
+			},
+		},
+		Subjects: []v12.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      tenantName + "-user",
+				Namespace: "default",
+			},
+		},
+		RoleRef: v12.RoleRef{
+			Kind: "Role",
+			Name: tenantName + "-defaultrole",
+		},
+	}
+
+}

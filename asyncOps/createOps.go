@@ -115,18 +115,8 @@ func CreatePod(cmd *cobra.Command, s *spinner.Spinner, args []string) <-chan int
 		target, _ := cmd.Flags().GetString("target")
 		secrets, _ := cmd.Flags().GetStringArray("secrets")
 		deploySecret, _ := cmd.Flags().GetString("deploy-secret")
-		tenant, _ := cmd.Flags().GetString("tenant")
 
-		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
-
-		if tenant != "" && target != "" {
-			namespaceName = tenant + "-" + target
-		} else if tenant != "" {
-			tenant = tools.GetTenantFromNamespace(namespaceName)
-			namespaceName = tenant + "-" + target
-		} else if target != "" {
-			namespaceName = tenant + "-" + tools.GetTenantDefaultTargetName(tenant, cmd)
-		}
+		namespaceName := tools.GetDeploymentNamespace(cmd)
 
 		if target == "" || tools.IsValidTarget(cmd, target, false) {
 

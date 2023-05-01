@@ -28,7 +28,7 @@ on the cluster.`,
 		}
 
 		//Get the namespace
-		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
+		namespaceName := tools.GetDeploymentNamespace(cmd)
 
 		//Get the secret
 		secretData := tools.GetPasswordAnswer("Enter your secret here:")
@@ -44,13 +44,16 @@ on the cluster.`,
 		clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), secretObject, metav1.CreateOptions{})
 
 		s.Stop()
-		fmt.Println("Complete!")
+		fmt.Println("Done!")
 
 	},
 }
 
 func init() {
 	createCmd.AddCommand(createSecretCmd)
+
+	createSecretCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
+	createSecretCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
 
 	// Here you will define your flags and configuration settings.
 

@@ -25,7 +25,7 @@ on the cluster.`,
 			tools.HandleError(err, cmd)
 		}
 
-		namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
+		namespaceName := tools.GetDeploymentNamespace(cmd)
 		fileName, _ := cmd.Flags().GetString("input")
 
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
@@ -47,7 +47,7 @@ on the cluster.`,
 		}
 
 		s.Stop()
-		fmt.Println("Complete!")
+		fmt.Println("Done!")
 
 	},
 }
@@ -56,8 +56,11 @@ func init() {
 	createCmd.AddCommand(createDeploySecretCmd)
 
 	createDeploySecretCmd.Flags().StringP("input", "", "", "Path to your .dockerfile to read credentials from.")
+	createDeploySecretCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
+	createDeploySecretCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
 	createDeploySecretCmd.MarkFlagRequired("input")
 	createDeploySecretCmd.MarkFlagFilename("input", "json")
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
