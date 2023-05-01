@@ -1,12 +1,11 @@
 package create
 
 import (
+	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"kufast/clusterOperations"
-	"os"
-	"time"
+	"kufast/tools"
 )
 
 // createCmd represents the create command
@@ -20,14 +19,15 @@ You can customize your deployment with the flags below or by using the interacti
 		if isInteractive {
 			args = createPodInteractive(cmd, args)
 		}
-		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = "Creating Objects - Please wait!  "
-		s.Start()
+		s := tools.CreateStandardSpinner(tools.MESSAGE_CREATE_OBJECTS)
 
-		res := clusterOperations.CreatePod(cmd, s, args)
-		_ = <-res
+		res := clusterOperations.CreatePod(cmd, args)
+		err := <-res
 		s.Stop()
-		fmt.Println("Complete!")
+		if err != "" {
+			tools.HandleError(errors.New(err), cmd)
+		}
+		fmt.Println(tools.MESSAGE_DONE)
 
 	},
 }

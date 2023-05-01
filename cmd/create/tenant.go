@@ -1,16 +1,11 @@
 package create
 
 import (
-	"context"
+	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kufast/clusterOperations"
-	"kufast/objectFactory"
 	"kufast/tools"
-	"os"
-	"time"
 )
 
 // createCmd represents the create command
@@ -24,76 +19,54 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		if isInteractive {
 			args = createTenantInteractive(cmd, args)
 		}
-
-		//Configblock
-		clientset, clientconfig, err := tools.GetUserClient(cmd)
-		if err != nil {
-			fmt.Println(err.Error())
+		if len(args) < 1 {
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
 		//Activate spinner
-		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = "Creating Objects - Please wait!  "
-		s.Start()
+		s := tools.CreateStandardSpinner(tools.MESSAGE_CREATE_OBJECTS)
 
-		_, err = clientset.CoreV1().ServiceAccounts("default").Create(context.TODO(), objectFactory.NewTenantUser(args[0], "default"), metav1.CreateOptions{})
-		if err != nil {
-			s.Stop()
-			tools.HandleError(err, cmd)
-		}
+		for _, tenantName := range args {
 
-		_, err = clientset.RbacV1().Roles("default").Create(context.TODO(), objectFactory.NewTenantDefaultRole(args[0]), metav1.CreateOptions{})
-		if err != nil {
-			s.Stop()
-			tools.HandleError(err, cmd)
-		}
+			err := clusterOperations.CreateTenant(tenantName, cmd)
+			if err != nil {
+				tools.HandleError(err, cmd)
+			}
 
-		_, err = clientset.RbacV1().RoleBindings("default").Create(context.TODO(), objectFactory.NewTenantDefaultRoleBinding(args[0]), metav1.CreateOptions{})
-		if err != nil {
-			s.Stop()
-			tools.HandleError(err, cmd)
-		}
+			//Read targets from Cobra
+			targets, _ := cmd.Flags().GetStringArray("target")
 
-		//Read targets from Cobra
-		targets, _ := cmd.Flags().GetStringArray("target")
+			var createTargetOps []<-chan string
+			var targetResults []string
 
-		var createTargetOps []<-chan int32
-		var targetResults []int32
+			if targets != nil {
+				for _, targetName := range targets {
+					createTargetOps = append(createTargetOps, clusterOperations.CreateTenantTarget(tenantName, targetName, cmd))
 
-		if targets != nil {
-			for _, target := range targets {
-				if tools.IsValidTarget(cmd, target, true) {
-					createTargetOps = append(createTargetOps, clusterOperations.CreateTenantTarget(args[0], target, cmd, s))
-				} else {
-					s.Stop()
-					fmt.Println("Invalid target: " + target)
-					s.Start()
+				}
+				//Ensure all operations are done
+				for _, op := range createTargetOps {
+					targetResults = append(targetResults, <-op)
 				}
 
+				for _, res := range targetResults {
+					if res != "" {
+						s.Stop()
+						fmt.Println(res)
+						s.Start()
+					}
+				}
 			}
-		}
 
-		//Ensure all operations are done
-		for _, op := range createTargetOps {
-			targetResults = append(targetResults, <-op)
-		}
-
-		user, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), args[0]+"-user", metav1.GetOptions{})
-
-		for i, res := range targetResults {
-			if res == 0 {
-				tools.AddTargetToTenant(cmd, targets[i], user)
+			err = tools.WriteNewUserYamlToFile(tenantName, cmd, s)
+			if err != nil {
+				tools.HandleError(err, cmd)
 			}
+
 		}
-		_, err = clientset.CoreV1().ServiceAccounts("default").Update(context.TODO(), user, metav1.UpdateOptions{})
-		if err != nil {
-			s.Stop()
-			fmt.Println(err)
-			s.Start()
-		}
-		tools.WriteNewUserYamlToFile(args[0], clientconfig, clientset, cmd, s)
+
 		s.Stop()
-		fmt.Println("Done!")
+		fmt.Println(tools.MESSAGE_DONE)
 	},
 }
 
@@ -105,14 +78,6 @@ func createTenantInteractive(cmd *cobra.Command, args []string) []string {
 func init() {
 	createCmd.AddCommand(createTenantCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	createTenantCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for this namespace")
 	createTenantCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
 	createTenantCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage in this namespace")

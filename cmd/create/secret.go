@@ -1,15 +1,11 @@
 package create
 
 import (
-	"context"
+	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kufast/objectFactory"
+	"kufast/clusterOperations"
 	"kufast/tools"
-	"os"
-	"time"
 )
 
 // createCmd represents the create command
@@ -21,30 +17,23 @@ Upon completion, the command yields the users credentials. This command will fai
 on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		//Default config block
-		clientset, _, err := tools.GetUserClient(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
+		if len(args) != 1 {
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
-
-		//Get the namespace
-		namespaceName := tools.GetTenantTargetFromCmd(cmd)
 
 		//Get the secret
 		secretData := tools.GetPasswordAnswer("Enter your secret here:")
 
-		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = "Creating Objects - Please wait!  "
-		s.Start()
+		s := tools.CreateStandardSpinner(tools.MESSAGE_CREATE_OBJECTS)
 
-		//create secret object
-		secretObject := objectFactory.NewSecret(namespaceName, args[0], secretData)
-
-		//Push secret
-		clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), secretObject, metav1.CreateOptions{})
+		err := clusterOperations.CreateSecret(args[0], secretData, cmd)
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
 
 		s.Stop()
-		fmt.Println("Done!")
+		fmt.Println(tools.MESSAGE_DONE)
 
 	},
 }
@@ -55,13 +44,4 @@ func init() {
 	createSecretCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
 	createSecretCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

@@ -3,7 +3,7 @@ package clusterOperations
 import (
 	"context"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kufast/objectFactory"
 	"kufast/tools"
 	"os"
@@ -34,7 +34,7 @@ func CreateDeploymentSecret(secretName string, cmd *cobra.Command) error {
 
 	deploymentSecretObject := objectFactory.NewDeploymentSecret(namespaceName, secretName, creds)
 
-	_, err = clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), deploymentSecretObject, v1.CreateOptions{})
+	_, err = clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), deploymentSecretObject, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -42,8 +42,28 @@ func CreateDeploymentSecret(secretName string, cmd *cobra.Command) error {
 	return nil
 }
 
-func CreateSecret(secretName string, cmd *cobra.Command) error {
+func CreateSecret(secretName string, secretData string, cmd *cobra.Command) error {
+	//Default config block
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return err
+	}
 
+	//Get the namespace
+	namespaceName, err := GetTenantTargetNameFromCmd(cmd)
+	if err != nil {
+		return err
+	}
+
+	//create secret object
+	secretObject := objectFactory.NewSecret(namespaceName, secretName, secretData)
+
+	//Push secret
+	_, err = clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), secretObject, metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func DeleteSecret(secretName string, cmd *cobra.Command) <-chan string {
@@ -60,14 +80,14 @@ func DeleteSecret(secretName string, cmd *cobra.Command) <-chan string {
 
 		namespaceName, err := GetTenantTargetNameFromCmd(cmd)
 
-		err = clientset.CoreV1().Secrets(namespaceName).Delete(context.TODO(), secretName, v1.DeleteOptions{})
+		err = clientset.CoreV1().Secrets(namespaceName).Delete(context.TODO(), secretName, metav1.DeleteOptions{})
 		if err != nil {
 			r <- err.Error()
 			return
 		}
 
 		for true {
-			_, err := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), secretName, v1.GetOptions{})
+			_, err := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), secretName, metav1.GetOptions{})
 			if err != nil {
 				r <- err.Error()
 				return

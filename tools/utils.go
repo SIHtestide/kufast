@@ -8,13 +8,12 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
 	"os"
 	"strings"
 	"syscall"
+	"time"
 )
 
 const KUFAST_TENANT_DEFAULT_LABEL = "kufast/default"
@@ -23,6 +22,7 @@ const KUFAST_TENANT_NODEACCESS_LABEL = "kufast.nodeAccess/"
 const KUFAST_NODE_HOSTNAME_LABEL = "kubernetes.io/hostname/"
 const KUFAST_NODE_GROUP_LABEL = "kufast.group/"
 const KUFAST_TENANT_TARGET_ADMISSION_LABEL = "kufast.nodeAccess/"
+const KUFAST_TENANT_LABEL = "kufast/tenant"
 
 func HandleError(err error, cmd *cobra.Command) {
 	fmt.Println("\n\n" + err.Error() + "\n\n")
@@ -46,19 +46,20 @@ func GetPasswordAnswer(question string) string {
 	return strings.TrimSpace(string(password))
 }
 
-func WriteNewUserYamlToFile(tenantName string, clientConfig *rest.Config, clientset *kubernetes.Clientset, cmd *cobra.Command, s *spinner.Spinner) {
+func WriteNewUserYamlToFile(tenantName string, cmd *cobra.Command, s *spinner.Spinner) error {
+
+	clientset, clientConfig, err := GetUserClient(cmd)
+	if err != nil {
+		return err
+	}
 
 	tenant, errUser := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
 	if errUser != nil {
-		s.Stop()
-		fmt.Println(errUser)
-		s.Start()
+		return err
 	}
 	secret, errSecret := clientset.CoreV1().Secrets("default").Get(context.TODO(), tenant.Secrets[0].Name, metav1.GetOptions{})
 	if errSecret != nil {
-		s.Stop()
-		fmt.Println(errSecret)
-		s.Start()
+		return err
 	}
 
 	out, _ := cmd.Flags().GetString("output")
@@ -90,14 +91,21 @@ func WriteNewUserYamlToFile(tenantName string, clientConfig *rest.Config, client
 		newConfig.Contexts["default-context"].Namespace = tenantName + "-" + tenant.ObjectMeta.Labels["kufast/defaultTarget"]
 	}
 
-	err := clientcmd.WriteToFile(newConfig, out+"/"+tenantName+".kubeconfig")
+	err = clientcmd.WriteToFile(newConfig, out+"/"+tenantName+".kubeconfig")
 	if err != nil {
-		s.Stop()
-		fmt.Println("Unable to write config: " + err.Error())
-		s.Start()
+		return err
 	} else {
 		s.Stop()
 		fmt.Println("Config for tenant " + tenantName + " written to " + out + "/" + tenantName + ".kubeconfig")
 		s.Start()
 	}
+	return nil
+}
+
+func CreateStandardSpinner(message string) *spinner.Spinner {
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+	s.Prefix = message + "  "
+	s.Start()
+
+	return s
 }

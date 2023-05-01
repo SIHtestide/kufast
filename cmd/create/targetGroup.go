@@ -3,11 +3,9 @@ package create
 import (
 	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
+	"kufast/clusterOperations"
 	"kufast/tools"
-	"os"
-	"time"
 )
 
 // createCmd represents the create command
@@ -20,14 +18,12 @@ on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 2 {
-			tools.HandleError(errors.New("too few arguments provided"), cmd)
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
-		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = "Creating Objects - Please wait!  "
-		s.Start()
+		s := tools.CreateStandardSpinner(tools.MESSAGE_CREATE_OBJECTS)
 
-		err := tools.SetTargetGroupToNodes(args[0], args[:1], cmd)
+		err := clusterOperations.SetTargetGroupToNodes(args[0], args[:1], cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
@@ -41,13 +37,4 @@ on the cluster.`,
 func init() {
 	createCmd.AddCommand(createTargetGroupCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// createCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// createCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

@@ -11,12 +11,13 @@ import (
 )
 
 func CreatePod(cmd *cobra.Command, args []string) <-chan string {
-	r := make(chan string)
+	res := make(chan string)
 
 	go func() {
+		defer close(res)
 		clientset, _, err := tools.GetUserClient(cmd)
 		if err != nil {
-			r <- err.Error()
+			res <- err.Error()
 			return
 		}
 
@@ -36,7 +37,7 @@ func CreatePod(cmd *cobra.Command, args []string) <-chan string {
 
 			_, err2 := clientset.CoreV1().Pods(namespaceName).Create(context.TODO(), podObject, metav1.CreateOptions{})
 			if err2 != nil {
-				r <- err.Error()
+				res <- err.Error()
 				return
 			}
 
@@ -44,18 +45,56 @@ func CreatePod(cmd *cobra.Command, args []string) <-chan string {
 				time.Sleep(time.Millisecond * 1000)
 				pod, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), args[0], metav1.GetOptions{})
 				if err != nil {
-					r <- err.Error()
+					res <- err.Error()
 					return
 				}
 				if pod.Status.Phase == "Running" {
-					r <- ""
+					res <- ""
 					break
 				}
 			}
 		} else {
-			r <- errors.New("Invalid target for tenant").Error()
+			res <- errors.New("Invalid target for tenant").Error()
 			return
 		}
 	}()
-	return r
+	return res
+}
+
+func DeletePod(cmd *cobra.Command, pod string) <-chan string {
+	res := make(chan string)
+
+	go func() {
+		defer close(res)
+		clientset, _, err := tools.GetUserClient(cmd)
+		if err != nil {
+			res <- err.Error()
+			return
+		}
+
+		namespaceName, err := GetTenantTargetNameFromCmd(cmd)
+		if err != nil {
+			res <- err.Error()
+			return
+		}
+
+		err = clientset.CoreV1().Pods(namespaceName).Delete(context.TODO(), pod, metav1.DeleteOptions{})
+		if err != nil {
+			res <- err.Error()
+			return
+		}
+
+		//Check for the pod been deleted from the system
+		for true {
+			time.Sleep(time.Millisecond * 250)
+			_, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), pod, metav1.GetOptions{})
+			if err != nil {
+				res <- ""
+				break
+			}
+		}
+
+	}()
+
+	return res
 }

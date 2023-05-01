@@ -6,10 +6,32 @@ import (
 	"github.com/spf13/cobra"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/objectFactory"
 	"kufast/tools"
 )
 
-func CreateTenant(cmd *cobra.Command) error {
+func CreateTenant(tenantName string, cmd *cobra.Command) error {
+
+	//Configblock
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return err
+	}
+
+	_, err = clientset.CoreV1().ServiceAccounts("default").Create(context.TODO(), objectFactory.NewTenantUser(tenantName, "default"), metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+
+	_, err = clientset.RbacV1().Roles("default").Create(context.TODO(), objectFactory.NewTenantDefaultRole(tenantName), metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+
+	_, err = clientset.RbacV1().RoleBindings("default").Create(context.TODO(), objectFactory.NewTenantDefaultRoleBinding(tenantName), metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -26,12 +48,28 @@ func GetTenantNameFromCmd(cmd *cobra.Command) (string, error) {
 	return tenant, nil
 }
 
-func GetTenant(cmd *cobra.Command) (*v1.ServiceAccount, error) {
+func GetTenantFromCmd(cmd *cobra.Command) (*v1.ServiceAccount, error) {
 
 	tenantName, err := GetTenantNameFromCmd(cmd)
 	if err != nil {
 		return nil, err
 	}
+
+	//Configblock
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func GetTenantFromString(cmd *cobra.Command, tenantName string) (*v1.ServiceAccount, error) {
 
 	//Configblock
 	clientset, _, err := tools.GetUserClient(cmd)
@@ -54,7 +92,7 @@ func UpdateTenantDefaultDeployTarget(newDefaultTarget string, cmd *cobra.Command
 		return err
 	}
 
-	tenant, err := GetTenant(cmd)
+	tenant, err := GetTenantFromCmd(cmd)
 	if err != nil {
 		return err
 	}
@@ -81,7 +119,7 @@ func DeleteTargetFromTenant(targetName string, cmd *cobra.Command) error {
 			return errors.New(err.Error())
 		}
 
-		tenant, err := GetTenant(cmd)
+		tenant, err := GetTenantFromCmd(cmd)
 		if err != nil {
 			return errors.New(err.Error())
 		}
@@ -126,7 +164,7 @@ func AddTargetToTenant(cmd *cobra.Command, targetName string, user *v1.ServiceAc
 
 func GetTenantDefaultTargetNameFromCmd(cmd *cobra.Command) (string, error) {
 
-	user, err := GetTenant(cmd)
+	user, err := GetTenantFromCmd(cmd)
 	if err != nil {
 		return "", err
 	}

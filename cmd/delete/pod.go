@@ -1,56 +1,52 @@
 package delete
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/clusterOperations"
 	"kufast/tools"
-	"os"
-	"time"
 )
 
 // deleteCmd represents the delete command
 var deletePodCmd = &cobra.Command{
-	Use:   "pod <pod>",
+	Use:   "pod <pods>..",
 	Short: "Delete the selected pod including its storage.",
 	Long:  `Delete the selected pod including its storage. Please use with care! Deleted data cannot be restored.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Check that exactly one arg has been provided (the namespace)
 		if len(args) != 1 {
-			tools.HandleError(errors.New("Too few or too many arguments provided."), cmd)
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
 		//Ensure user knows what he does
 		answer := tools.GetDialogAnswer("Pod " + args[0] + " will be deleted together with its storage and logs! Continue? (No/yes)")
 		if answer == "yes" {
 
-			clientset, _, err := tools.GetUserClient(cmd)
-			if err != nil {
-				tools.HandleError(err, cmd)
+			s := tools.CreateStandardSpinner(tools.MESSAGE_DELETE_OBJECTS)
+
+			var deleteTargetOps []<-chan string
+			var targetResults []string
+
+			for _, podName := range args {
+				deleteTargetOps = append(deleteTargetOps, clusterOperations.DeletePod(cmd, podName))
+
 			}
 
-			namespaceName := tools.GetTenantTargetFromCmd(cmd)
-
-			err = clientset.CoreV1().Pods(namespaceName).Delete(context.TODO(), args[0], v1.DeleteOptions{})
-			if err != nil {
-				tools.HandleError(err, cmd)
+			//Ensure all operations are done
+			for _, op := range deleteTargetOps {
+				targetResults = append(targetResults, <-op)
 			}
 
-			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-			s.Prefix = "Deleting Objects - Please wait!  "
-			s.Start()
-
-			//Check for the pod been deleted from the system
-			for true {
-				_, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), args[0], v1.GetOptions{})
-				if err != nil {
-					break
+			for _, res := range targetResults {
+				if res != "" {
+					s.Stop()
+					fmt.Println(res)
+					s.Start()
 				}
 			}
+
 			s.Stop()
 			fmt.Println("Done!")
 
