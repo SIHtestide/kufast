@@ -17,6 +17,13 @@ import (
 	"syscall"
 )
 
+const KUFAST_TENANT_DEFAULT_LABEL = "kufast/default"
+const KUFAST_TENANT_GROUPACCESS_LABEL = "kufast.groupAccess/"
+const KUFAST_TENANT_NODEACCESS_LABEL = "kufast.nodeAccess/"
+const KUFAST_NODE_HOSTNAME_LABEL = "kubernetes.io/hostname/"
+const KUFAST_NODE_GROUP_LABEL = "kufast.group/"
+const KUFAST_TENANT_TARGET_ADMISSION_LABEL = "kufast.nodeAccess/"
+
 func HandleError(err error, cmd *cobra.Command) {
 	fmt.Println("\n\n" + err.Error() + "\n\n")
 	_ = cmd.Help()

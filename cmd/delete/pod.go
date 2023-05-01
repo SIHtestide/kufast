@@ -33,7 +33,7 @@ var deletePodCmd = &cobra.Command{
 				tools.HandleError(err, cmd)
 			}
 
-			namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
+			namespaceName := tools.GetTenantTargetFromCmd(cmd)
 
 			err = clientset.CoreV1().Pods(namespaceName).Delete(context.TODO(), args[0], v1.DeleteOptions{})
 			if err != nil {
@@ -62,13 +62,7 @@ var deletePodCmd = &cobra.Command{
 func init() {
 	deleteCmd.AddCommand(deletePodCmd)
 
-	// Here you will define your flags and configuration settings.
+	deletePodCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	deletePodCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

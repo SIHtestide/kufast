@@ -1,12 +1,11 @@
 package create
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kufast/objectFactory"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 	"time"
@@ -20,31 +19,16 @@ var createDeploySecretCmd = &cobra.Command{
 Upon completion, the command yields the users credentials. This command will fail, if you do not have admin rights 
 on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		clientset, _, err := tools.GetUserClient(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
 
-		namespaceName := tools.GetDeploymentNamespace(cmd)
-		fileName, _ := cmd.Flags().GetString("input")
+		if len(args) != 1 {
+			tools.HandleError(errors.New("too many or too few arguments provided"), cmd)
+		}
 
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
 
-		creds, err := os.ReadFile(fileName)
-		if err != nil {
-			s.Stop()
-			tools.HandleError(err, cmd)
-		}
-
-		deploymentSecretObject := objectFactory.NewDeploymentSecret(namespaceName, args[0], creds)
-
-		_, err = clientset.CoreV1().Secrets(namespaceName).Create(context.TODO(), deploymentSecretObject, v1.CreateOptions{})
-		if err != nil {
-			s.Stop()
-			tools.HandleError(err, cmd)
-		}
+		clusterOperations.CreateDeploymentSecret(args[0], cmd)
 
 		s.Stop()
 		fmt.Println("Done!")

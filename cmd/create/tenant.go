@@ -6,7 +6,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kufast/asyncOps"
+	"kufast/clusterOperations"
 	"kufast/objectFactory"
 	"kufast/tools"
 	"os"
@@ -63,7 +63,7 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		if targets != nil {
 			for _, target := range targets {
 				if tools.IsValidTarget(cmd, target, true) {
-					createTargetOps = append(createTargetOps, asyncOps.CreateNamespace(args[0], target, cmd, s))
+					createTargetOps = append(createTargetOps, clusterOperations.CreateTenantTarget(args[0], target, cmd, s))
 				} else {
 					s.Stop()
 					fmt.Println("Invalid target: " + target)

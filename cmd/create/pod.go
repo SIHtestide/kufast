@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	"kufast/asyncOps"
+	"kufast/clusterOperations"
 	"os"
 	"time"
 )
@@ -24,7 +24,7 @@ You can customize your deployment with the flags below or by using the interacti
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
 
-		res := asyncOps.CreatePod(cmd, s, args)
+		res := clusterOperations.CreatePod(cmd, s, args)
 		_ = <-res
 		s.Stop()
 		fmt.Println("Complete!")

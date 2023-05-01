@@ -33,7 +33,7 @@ func NewNamespace(tenantName string, targetName string, cmd *cobra.Command) *v1.
 	if target.AccessType == "node" {
 		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kubernetes.io/hostname=" + target.Name
 	} else {
-		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kufast/group=" + target.Name
+		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kufast.group/" + target.Name + "=true"
 	}
 	return newNamespace
 }

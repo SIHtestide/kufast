@@ -5,37 +5,37 @@ import (
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	"kufast/asyncOps"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 	"time"
 )
 
 // deleteCmd represents the delete command
-var deleteUserCmd = &cobra.Command{
-	Use:   "user <user>..",
-	Short: "Delete a user and his credentials.",
+var deleteTenantCmd = &cobra.Command{
+	Use:   "tenant <tenant>..",
+	Short: "Delete tenants, their namespaces and their credentials.",
 	Long: `Delete a user and his credentials. This operation can only be executed by a cluster admin.
 Please use with care! Deleted data cannot be restored.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//Check that exactly one arg has been provided (the namespace)
+		//Check that at least one tenant has been provided
 		if len(args) < 1 {
-			tools.HandleError(errors.New("Too few arguments provided."), cmd)
+			tools.HandleError(errors.New("provide at least one tenant"), cmd)
 		}
 
 		//Ensure user knows what he does
-		answer := tools.GetDialogAnswer("User " + args[0] + " will be deleted! Continue? (No/yes)")
+		answer := tools.GetDialogAnswer("Tenant will be deleted along with all deployment-targets, continue(yes/No)?")
 		if answer == "yes" {
 
 			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-			s.Prefix = "Creating Objects - Please wait!  "
+			s.Prefix = "Deleting Objects - Please wait!  "
 			s.Start()
 
 			var deleteOps []<-chan int32
 			var results []int32
 
 			for _, user := range args {
-				deleteOps = append(deleteOps, asyncOps.DeleteUser(user, cmd, s))
+				deleteOps = append(deleteOps, clusterOperations.DeleteUser(user, cmd, s))
 			}
 
 			for _, op := range deleteOps {
@@ -50,6 +50,6 @@ Please use with care! Deleted data cannot be restored.`,
 }
 
 func init() {
-	deleteCmd.AddCommand(deleteUserCmd)
+	deleteCmd.AddCommand(deleteTenantCmd)
 
 }

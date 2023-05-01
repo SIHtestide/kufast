@@ -28,7 +28,7 @@ on the cluster.`,
 		}
 
 		//Get the namespace
-		namespaceName := tools.GetDeploymentNamespace(cmd)
+		namespaceName := tools.GetTenantTargetFromCmd(cmd)
 
 		//Get the secret
 		secretData := tools.GetPasswordAnswer("Enter your secret here:")

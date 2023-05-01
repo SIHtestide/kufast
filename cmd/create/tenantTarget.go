@@ -7,7 +7,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"kufast/asyncOps"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 	"time"
@@ -51,7 +51,7 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		var targetResults []int32
 
 		for _, targetName := range args {
-			createTargetOps = append(createTargetOps, asyncOps.CreateNamespace(tenant, targetName, cmd, s))
+			createTargetOps = append(createTargetOps, clusterOperations.CreateTenantTarget(tenant, targetName, cmd, s))
 		}
 		//Ensure all operations are done
 		for _, op := range createTargetOps {

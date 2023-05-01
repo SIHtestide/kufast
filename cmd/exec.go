@@ -24,7 +24,7 @@ command line type "exit".`,
 		command, _ := cmd.Flags().GetString("command")
 
 		//Populate namespace field
-		namespaceName := tools.GetDeploymentNamespace(cmd)
+		namespaceName := tools.GetTenantTargetFromCmd(cmd)
 
 		clientset, config, err := tools.GetUserClient(cmd)
 		if err != nil {

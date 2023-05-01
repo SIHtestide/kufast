@@ -33,24 +33,6 @@ func GetUserClient(cmd *cobra.Command) (*kubernetes.Clientset, *rest.Config, err
 	return clientset, config, nil
 }
 
-func GetDeploymentNamespace(cmd *cobra.Command) string {
-
-	namespaceName, _ := GetNamespaceFromUserConfig(cmd)
-
-	tenantName, _ := cmd.Flags().GetString("tenant")
-	targetName, _ := cmd.Flags().GetString("target")
-
-	if tenantName != "" && targetName != "" {
-		namespaceName = tenantName + "-" + targetName
-	} else if tenantName != "" {
-		tenantName = GetTenantFromNamespace(namespaceName)
-		namespaceName = tenantName + "-" + targetName
-	} else if targetName != "" {
-		namespaceName = tenantName + "-" + GetTenantDefaultTargetName(tenantName, cmd)
-	}
-	return namespaceName
-}
-
 func GetTenantFromNamespace(namespaceName string) string {
 	return strings.Split(namespaceName, ("-"))[0]
 }

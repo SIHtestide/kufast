@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	"kufast/asyncOps"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 	"time"
@@ -35,7 +35,7 @@ Please use with care! Deleted data cannot be restored.`,
 			var results []int32
 
 			for _, secret := range args {
-				deleteOps = append(deleteOps, asyncOps.DeleteSecret(secret, cmd, s))
+				deleteOps = append(deleteOps, clusterOperations.DeleteSecret(secret, cmd, s))
 			}
 
 			for _, op := range deleteOps {
@@ -50,6 +50,9 @@ Please use with care! Deleted data cannot be restored.`,
 }
 
 func init() {
-	deleteCmd.AddCommand(deleteUserCmd)
+	deleteCmd.AddCommand(deleteSecretCmd)
+
+	deleteSecretCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	deleteSecretCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 
 }
