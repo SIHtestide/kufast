@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/clusterOperations"
 	"kufast/objectFactory"
 	"kufast/tools"
 	"os"
@@ -15,15 +16,15 @@ import (
 )
 
 // listCmd represents the list command
-var updateNamespaceCmd = &cobra.Command{
-	Use:   "namespace <namespace>",
+var updateTenantTargetCmd = &cobra.Command{
+	Use:   "tenant-target <tenant target>",
 	Short: "Update Memory and CPU capabilities. Updates the role scheme to the latest version.",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Check that exactly one arg has been provided (the namespace)
 		if len(args) < 1 {
-			tools.HandleError(errors.New("Too few arguments provided."), cmd)
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
 		//Initial config block
@@ -32,34 +33,43 @@ var updateNamespaceCmd = &cobra.Command{
 			tools.HandleError(err, cmd)
 		}
 
-		//Get Current Namespace
-		namespace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), args[0], metav1.GetOptions{})
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
-
-		//Get quotas for namespace
-		quota, err := clientset.CoreV1().ResourceQuotas(args[0]).Get(context.TODO(), args[0]+"-limits", metav1.GetOptions{})
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
-
-		//Get Networkpolicy for namespace
-		nps, err := clientset.NetworkingV1().NetworkPolicies(args[0]).List(context.TODO(), metav1.ListOptions{})
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
-
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 		s.Prefix = "Creating Objects - Please wait!  "
 		s.Start()
 
+		tenantName, err := clusterOperations.GetTenantNameFromCmd(cmd)
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
+
+		tenantTargetName := tenantName + "-" + args[0]
+
+		//Get Current Namespace
+		namespace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), tenantTargetName, metav1.GetOptions{})
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
+
+		//Get quotas for namespace
+		quota, err := clientset.CoreV1().ResourceQuotas(tenantTargetName).Get(context.TODO(), tenantTargetName+"-limits", metav1.GetOptions{})
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
+
+		//Get Networkpolicy for namespace
+		nps, err := clientset.NetworkingV1().NetworkPolicies(tenantTargetName).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
+
 		ram, _ := cmd.Flags().GetString("memory")
 		cpu, _ := cmd.Flags().GetString("cpu")
-		tenant, _ := cmd.Flags().GetString("tenant")
 		target, _ := cmd.Flags().GetString("target")
 
-		namespace.Labels["tenant"] = tenant
 		if namespace.ObjectMeta.Annotations == nil {
 			//No annotations have been provided, need to create them
 			annotations := map[string]string{}
@@ -84,10 +94,10 @@ var updateNamespaceCmd = &cobra.Command{
 
 		if len(nps.Items) == 0 {
 			//Keine Policy, erstelle Policy
-			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Create(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenant), metav1.CreateOptions{})
+			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Create(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenantName), metav1.CreateOptions{})
 		} else if len(nps.Items) == 1 {
 			//Update Policy
-			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Update(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenant), metav1.UpdateOptions{})
+			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Update(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenantName), metav1.UpdateOptions{})
 		} else {
 			s.Stop()
 			fmt.Println("More than one Network policy detected! ignoring..")
@@ -122,10 +132,11 @@ var updateNamespaceCmd = &cobra.Command{
 }
 
 func init() {
-	updateCmd.AddCommand(updateNamespaceCmd)
+	updateCmd.AddCommand(updateTenantTargetCmd)
 
-	updateNamespaceCmd.Flags().StringP("memory", "", "4Gi", "Limit the RAM usage for this namespace")
-	updateNamespaceCmd.Flags().StringP("cpu", "", "2", "Limit the CPU usage for this namespace")
-	updateNamespaceCmd.Flags().StringP("target", "", "", "Deployment target for the namespace. Can be specified multiple times. Leave empty, for all targets")
-	updateNamespaceCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
+	updateTenantTargetCmd.Flags().StringP("memory", "", "4Gi", "Limit the RAM usage for this namespace")
+	updateTenantTargetCmd.Flags().StringP("cpu", "", "2", "Limit the CPU usage for this namespace")
+	updateTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
+	_ = updateTenantTargetCmd.MarkFlagRequired("tenant")
+
 }

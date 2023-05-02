@@ -132,19 +132,19 @@ func UpdateTenantDefaultDeployTarget(newDefaultTarget string, cmd *cobra.Command
 
 }
 
-func DeleteTargetFromTenant(targetName string, cmd *cobra.Command) error {
-	if IsValidTarget(cmd, targetName, false) {
+func DeleteTargetFromTenant(targetName string, tenantName string, cmd *cobra.Command) error {
+	if IsValidTenantTarget(cmd, targetName, tenantName, false) {
 		clientset, _, err := tools.GetUserClient(cmd)
 		if err != nil {
 			return errors.New(err.Error())
 		}
 
-		target, err := GetTargetFromTargetName(cmd, targetName, false)
+		target, err := GetTargetFromTargetName(cmd, targetName, tenantName, false)
 		if err != nil {
 			return errors.New(err.Error())
 		}
 
-		tenant, err := GetTenantFromCmd(cmd)
+		tenant, err := GetTenantFromString(cmd, tenantName)
 		if err != nil {
 			return errors.New(err.Error())
 		}
@@ -166,25 +166,40 @@ func DeleteTargetFromTenant(targetName string, cmd *cobra.Command) error {
 	return nil
 }
 
-func AddTargetToTenant(cmd *cobra.Command, targetName string, user *v1.ServiceAccount) error {
-	if IsValidTarget(cmd, targetName, true) {
-		target, err := GetTargetFromTargetName(cmd, targetName, true)
+func AddTargetToTenant(cmd *cobra.Command, targetName string, tenantName string) error {
+	if IsValidTenantTarget(cmd, targetName, tenantName, true) {
+		clientset, _, err := tools.GetUserClient(cmd)
+		if err != nil {
+			return errors.New(err.Error())
+		}
+
+		target, err := GetTargetFromTargetName(cmd, targetName, tenantName, true)
+		if err != nil {
+			return err
+		}
+		tenant, err := GetTenantFromString(cmd, tenantName)
 		if err != nil {
 			return err
 		}
 		if target.AccessType == "node" {
-			user.ObjectMeta.Labels[tools.KUFAST_TENANT_NODEACCESS_LABEL+targetName] = "true"
+			tenant.ObjectMeta.Labels[tools.KUFAST_TENANT_NODEACCESS_LABEL+targetName] = "true"
 		} else {
-			user.ObjectMeta.Labels[tools.KUFAST_TENANT_GROUPACCESS_LABEL+targetName] = "true"
+			tenant.ObjectMeta.Labels[tools.KUFAST_TENANT_GROUPACCESS_LABEL+targetName] = "true"
 		}
+
+		// Populate default label if possible
+		if tenant.ObjectMeta.Labels[tools.KUFAST_TENANT_DEFAULT_LABEL] == "" {
+			tenant.ObjectMeta.Labels[tools.KUFAST_TENANT_DEFAULT_LABEL] = targetName
+		}
+		_, err = clientset.CoreV1().ServiceAccounts("default").Update(context.TODO(), tenant, metav1.UpdateOptions{})
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
 
-	// Populate default label if possible
-	if user.ObjectMeta.Labels[tools.KUFAST_TENANT_DEFAULT_LABEL] == "" {
-		user.ObjectMeta.Labels[tools.KUFAST_TENANT_DEFAULT_LABEL] = targetName
-	}
-
-	return nil
+	return errors.New("Invalid target!")
 }
 
 func GetTenantDefaultTargetNameFromCmd(cmd *cobra.Command) (string, error) {

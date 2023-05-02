@@ -12,7 +12,7 @@ import (
 )
 
 // getCmd represents the get command
-var getNamespaceCmd = &cobra.Command{
+var getTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <tenant-target>",
 	Short: "Get information about about a namespace",
 	Long:  `Get information about about a namespace.`,
@@ -88,8 +88,8 @@ var getNamespaceCmd = &cobra.Command{
 }
 
 func init() {
-	getCmd.AddCommand(getNamespaceCmd)
+	getCmd.AddCommand(getTenantTargetCmd)
 
-	getSecretCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	getTenantTargetCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 
 }

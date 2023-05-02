@@ -41,6 +41,13 @@ Write multiple names to create multiple namespaces at once. This command will fa
 
 			if targets != nil {
 				for _, targetName := range targets {
+					err = clusterOperations.AddTargetToTenant(cmd, targetName, tenantName)
+					if err != nil {
+						s.Stop()
+						fmt.Println(err)
+						s.Start()
+						continue
+					}
 					createTargetOps = append(createTargetOps, clusterOperations.CreateTenantTarget(tenantName, targetName, cmd))
 
 				}

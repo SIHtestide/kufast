@@ -21,7 +21,7 @@ func NewNamespace(tenantName string, target tools.Target, cmd *cobra.Command) *v
 			Name:        tenantName + "-" + target.Name,
 			Annotations: map[string]string{},
 			Labels: map[string]string{
-				"kufast/tenant": tenantName,
+				tools.KUFAST_TENANT_LABEL: tenantName,
 			},
 		},
 		Spec:   v1.NamespaceSpec{},
@@ -29,9 +29,9 @@ func NewNamespace(tenantName string, target tools.Target, cmd *cobra.Command) *v
 	}
 
 	if target.AccessType == "node" {
-		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kubernetes.io/hostname=" + target.Name
+		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = tools.KUFAST_NODE_HOSTNAME_LABEL + target.Name
 	} else {
-		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kufast.group/" + target.Name + "=true"
+		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = tools.KUFAST_NODE_GROUP_LABEL + target.Name + "=true"
 	}
 	return newNamespace
 }
@@ -125,7 +125,7 @@ func NewResourceQuota(namespace string, ram string, cpu string, storage string, 
 	return newQuota
 }
 
-func NewTenantUser(tenant string, namespace string) *v1.ServiceAccount {
+func NewTenantUser(tenant string, namespaceName string) *v1.ServiceAccount {
 	return &v1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceAccount",
@@ -133,12 +133,10 @@ func NewTenantUser(tenant string, namespace string) *v1.ServiceAccount {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      tenant + "-user",
-			Namespace: "default",
+			Namespace: namespaceName,
 			Labels: map[string]string{
-				"kufast/tenant":        tenant,
-				"kufast/defaultTarget": "",
-				"kufast/nodeAccess":    "",
-				"kufast/GroupAccess":   "",
+				tools.KUFAST_TENANT_LABEL:         tenant,
+				tools.KUFAST_TENANT_DEFAULT_LABEL: "",
 			},
 		},
 	}
@@ -203,7 +201,7 @@ func NewNetworkPolicy(namespaceName string, tenant string) *n1.NetworkPolicy {
 						{
 							NamespaceSelector: &metav1.LabelSelector{
 								MatchLabels: map[string]string{
-									"kufast/tenant": tenant,
+									tools.KUFAST_TENANT_LABEL: tenant,
 								},
 							},
 						},
@@ -252,14 +250,15 @@ func NewTenantDefaultRole(tenantName string) *v12.Role {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      tenantName + "-defaultrole",
-			Namespace: tenantName,
+			Namespace: "default",
 			Labels: map[string]string{
-				"kufast/tenant": tenantName,
+				tools.KUFAST_TENANT_LABEL: tenantName,
 			},
 		},
 		Rules: []v12.PolicyRule{
 			{
 				Verbs:         []string{"get"},
+				APIGroups:     []string{""},
 				Resources:     []string{"ServiceAccount"},
 				ResourceNames: []string{tenantName + "-user"},
 			},
@@ -276,9 +275,9 @@ func NewTenantDefaultRoleBinding(tenantName string) *v12.RoleBinding {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      tenantName + "-defaultrolebinding",
-			Namespace: tenantName,
+			Namespace: "default",
 			Labels: map[string]string{
-				"kufast/tenant": tenantName,
+				tools.KUFAST_TENANT_LABEL: tenantName,
 			},
 		},
 		Subjects: []v12.Subject{

@@ -17,11 +17,10 @@ import (
 )
 
 const KUFAST_TENANT_DEFAULT_LABEL = "kufast/default"
-const KUFAST_TENANT_GROUPACCESS_LABEL = "kufast.groupAccess/"
-const KUFAST_TENANT_NODEACCESS_LABEL = "kufast.nodeAccess/"
-const KUFAST_NODE_HOSTNAME_LABEL = "kubernetes.io/hostname/"
+const KUFAST_TENANT_GROUPACCESS_LABEL = "kufast.groupaccess/"
+const KUFAST_TENANT_NODEACCESS_LABEL = "kufast.nodeaccess/"
+const KUFAST_NODE_HOSTNAME_LABEL = "kubernetes.io/hostname"
 const KUFAST_NODE_GROUP_LABEL = "kufast.group/"
-const KUFAST_TENANT_TARGET_ADMISSION_LABEL = "kufast.nodeAccess/"
 const KUFAST_TENANT_LABEL = "kufast/tenant"
 
 func HandleError(err error, cmd *cobra.Command) {

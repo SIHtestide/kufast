@@ -30,19 +30,7 @@ func CreateTenantTarget(tenantName string, targetName string, cmd *cobra.Command
 		minStorage, _ := cmd.Flags().GetString("storage-min")
 		pods, _ := cmd.Flags().GetString("pods")
 
-		tenant, err := GetTenantFromString(cmd, tenantName)
-		if err != nil {
-			res <- err.Error()
-			return
-		}
-
-		err = AddTargetToTenant(cmd, targetName, tenant)
-		if err != nil {
-			res <- err.Error()
-			return
-		}
-
-		target, err := GetTargetFromTargetName(cmd, targetName, true)
+		target, err := GetTargetFromTargetName(cmd, targetName, tenantName, true)
 		if err != nil {
 			res <- err.Error()
 			return
@@ -102,7 +90,7 @@ func CreateTenantTarget(tenantName string, targetName string, cmd *cobra.Command
 
 }
 
-func DeleteTenantTarget(targetName string, cmd *cobra.Command) <-chan string {
+func DeleteTenantTarget(targetName string, tenantName string, cmd *cobra.Command) <-chan string {
 	res := make(chan string)
 
 	go func() {
@@ -110,18 +98,6 @@ func DeleteTenantTarget(targetName string, cmd *cobra.Command) <-chan string {
 
 		//Configblock
 		clientset, _, err := tools.GetUserClient(cmd)
-		if err != nil {
-			res <- err.Error()
-			return
-		}
-
-		tenantName, err := cmd.Flags().GetString("tenant")
-		if err != nil {
-			res <- err.Error()
-			return
-		}
-
-		err = DeleteTargetFromTenant(targetName, cmd)
 		if err != nil {
 			res <- err.Error()
 			return
@@ -174,10 +150,6 @@ func ListTenantTargets(tenantName string, cmd *cobra.Command) ([]*v1.Namespace, 
 	}
 
 	return tenantTargetObjects, nil
-
-}
-
-func UpdateTenantTarget(target string, cmd *cobra.Command) (*v1.Namespace, error) {
 
 }
 

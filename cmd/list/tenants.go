@@ -12,7 +12,7 @@ import (
 
 // listCmd represents the list command
 var listTenantsCmd = &cobra.Command{
-	Use:   "users",
+	Use:   "tenants",
 	Short: "List all users in a namespace",
 	Long: `List all users in your namespace. The overview contains the name of the user. And his permission within
 the cluster. This command will fail, if you do not have admin rights on the cluster.`,

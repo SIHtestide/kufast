@@ -37,22 +37,27 @@ Please use with care! Deleted data cannot be restored.`,
 				tools.HandleError(errors.New("Too few or too many arguments provided."), cmd)
 			}
 
+			tenantName, err := cmd.Flags().GetString("tenant")
+			if err != nil {
+				tools.HandleError(err, cmd)
+			}
+
 			//Activate spinner
 			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
 			s.Prefix = "Deleting Objects - Please wait!  "
 			s.Start()
 
-			user, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), args[0]+"-user", metav1.GetOptions{})
+			user, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
 			if err != nil {
+				s.Stop()
 				tools.HandleError(err, cmd)
 			}
 
 			var results []int
 
-			tenant, _ := cmd.Flags().GetString("tenant")
 			for _, tenantTargetName := range args {
 
-				err = clientset.CoreV1().Namespaces().Delete(context.TODO(), tenant+"-"+tenantTargetName, v1.DeleteOptions{})
+				err = clientset.CoreV1().Namespaces().Delete(context.TODO(), tenantName+"-"+tenantTargetName, v1.DeleteOptions{})
 				if err != nil {
 					s.Stop()
 					fmt.Println(err)
@@ -66,8 +71,9 @@ Please use with care! Deleted data cannot be restored.`,
 			//Remove capability from user
 			for i, res := range results {
 				if res == 0 {
-					err := clusterOperations.DeleteTargetFromTenant(args[i], cmd)
+					err := clusterOperations.DeleteTargetFromTenant(args[i], tenantName, cmd)
 					if err != nil {
+						s.Stop()
 						tools.HandleError(err, cmd)
 					}
 				}
@@ -93,13 +99,4 @@ func init() {
 	deleteTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
 	_ = deleteTenantTargetCmd.MarkFlagRequired("tenant")
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

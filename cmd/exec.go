@@ -6,6 +6,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 )
@@ -24,7 +25,10 @@ command line type "exit".`,
 		command, _ := cmd.Flags().GetString("command")
 
 		//Populate namespace field
-		namespaceName := tools.GetTenantTargetFromCmd(cmd)
+		namespaceName, err := clusterOperations.GetTenantTargetNameFromCmd(cmd)
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
 
 		clientset, config, err := tools.GetUserClient(cmd)
 		if err != nil {

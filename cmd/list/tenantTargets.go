@@ -12,7 +12,7 @@ import (
 
 // listCmd represents the list command
 var listTenantTargetsCmd = &cobra.Command{
-	Use:   "namespaces",
+	Use:   "tenant-targets",
 	Short: "List all namespaces in the cluster.",
 	Long:  `List all nodes in the cluster. The overview contains information about the status of each node.`,
 	Run: func(cmd *cobra.Command, args []string) {

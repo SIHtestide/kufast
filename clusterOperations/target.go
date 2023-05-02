@@ -27,13 +27,27 @@ func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 	return false
 }
 
-func GetTargetFromTargetName(cmd *cobra.Command, target string, all bool) (tools.Target, error) {
-	targets, err := ListTargetsFromCmd(cmd, all)
+func IsValidTenantTarget(cmd *cobra.Command, target string, tenantName string, all bool) bool {
+
+	targets, err := ListTargetsFromString(cmd, tenantName, all)
+	if err != nil {
+		return false
+	}
+	for _, t := range targets {
+		if t.Name == target {
+			return true
+		}
+	}
+	return false
+}
+
+func GetTargetFromTargetName(cmd *cobra.Command, targetName string, tenantName string, all bool) (tools.Target, error) {
+	targets, err := ListTargetsFromString(cmd, tenantName, all)
 	if err != nil {
 		return tools.Target{}, err
 	}
 	for _, t := range targets {
-		if t.Name == target {
+		if t.Name == targetName {
 			return t, nil
 		}
 	}
@@ -64,7 +78,7 @@ func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]t
 				AccessType: "node",
 			})
 			for key, elem := range node.ObjectMeta.Labels {
-				if strings.Contains(tools.KUFAST_NODE_GROUP_LABEL, key) && elem != "false" && !slices.Contains(groups, strings.TrimPrefix(key, tools.KUFAST_NODE_GROUP_LABEL)) {
+				if strings.Contains(key, tools.KUFAST_NODE_GROUP_LABEL) && elem != "false" && !slices.Contains(groups, strings.TrimPrefix(key, tools.KUFAST_NODE_GROUP_LABEL)) {
 					groups = append(groups, strings.TrimPrefix(key, tools.KUFAST_NODE_GROUP_LABEL))
 				}
 			}
@@ -80,15 +94,18 @@ func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]t
 
 	} else {
 
-		user, _ := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
+		user, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
 
 		for key, elem := range user.ObjectMeta.Labels {
-			if strings.Contains(tools.KUFAST_TENANT_GROUPACCESS_LABEL, key) && elem == "true" {
+			if strings.Contains(key, tools.KUFAST_TENANT_GROUPACCESS_LABEL) && elem == "true" {
 				results = append(results, tools.Target{
 					Name:       strings.TrimPrefix(key, tools.KUFAST_TENANT_GROUPACCESS_LABEL),
 					AccessType: "group",
 				})
-			} else if strings.Contains(tools.KUFAST_TENANT_NODEACCESS_LABEL, key) && elem != "false" {
+			} else if strings.Contains(key, tools.KUFAST_TENANT_NODEACCESS_LABEL) && elem == "true" {
 				results = append(results, tools.Target{
 					Name:       strings.TrimPrefix(key, tools.KUFAST_TENANT_NODEACCESS_LABEL),
 					AccessType: "node",

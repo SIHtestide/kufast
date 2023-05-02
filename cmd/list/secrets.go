@@ -41,4 +41,6 @@ To gain further information see the kubectl get pod command.`,
 func init() {
 	listCmd.AddCommand(listSecretsCmd)
 
+	listSecretsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+
 }

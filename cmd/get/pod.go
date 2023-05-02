@@ -59,6 +59,6 @@ var getPodCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getPodCmd)
 
-	getLogsCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	getLogsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	getPodCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	getPodCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 }

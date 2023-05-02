@@ -37,7 +37,8 @@ Please use with care! Deleted data cannot be restored.`,
 				var targetResults []string
 
 				for _, tenantTarget := range tenantTargets {
-					deleteTargetOps = append(deleteTargetOps, clusterOperations.DeleteTenantTarget(tenantTarget.Name, cmd))
+
+					deleteTargetOps = append(deleteTargetOps, clusterOperations.DeleteTenantTarget(tenantTarget.Name, tenantName, cmd))
 				}
 
 				//Ensure all operations are done

@@ -15,6 +15,7 @@ var createTenantTargetCmd = &cobra.Command{
 	Long: `This command creates a new namespace for a tenant. You can select the name and set limits to the namespace.
 Write multiple names to create multiple namespaces at once. This command will fail, if you do not have admin rights on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
 		isInteractive, _ := cmd.Flags().GetBool("interactive")
 		if isInteractive {
 			args = createTenantTargetInteractive(cmd, args)
@@ -36,6 +37,13 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		var targetResults []string
 
 		for _, targetName := range args {
+			err = clusterOperations.AddTargetToTenant(cmd, targetName, tenantName)
+			if err != nil {
+				s.Stop()
+				fmt.Println(err)
+				s.Start()
+				continue
+			}
 			createTargetOps = append(createTargetOps, clusterOperations.CreateTenantTarget(tenantName, targetName, cmd))
 
 		}
