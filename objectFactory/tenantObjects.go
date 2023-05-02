@@ -29,7 +29,7 @@ func NewNamespace(tenantName string, target tools.Target, cmd *cobra.Command) *v
 	}
 
 	if target.AccessType == "node" {
-		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = tools.KUFAST_NODE_HOSTNAME_LABEL + target.Name
+		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = tools.KUFAST_NODE_HOSTNAME_LABEL + "=" + target.Name
 	} else {
 		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = tools.KUFAST_NODE_GROUP_LABEL + target.Name + "=true"
 	}
@@ -259,7 +259,7 @@ func NewTenantDefaultRole(tenantName string) *v12.Role {
 			{
 				Verbs:         []string{"get"},
 				APIGroups:     []string{""},
-				Resources:     []string{"ServiceAccount"},
+				Resources:     []string{"serviceaccounts"},
 				ResourceNames: []string{tenantName + "-user"},
 			},
 		},

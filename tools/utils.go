@@ -86,8 +86,8 @@ func WriteNewUserYamlToFile(tenantName string, cmd *cobra.Command, s *spinner.Sp
 		},
 		CurrentContext: "default-context",
 	}
-	if tenant.ObjectMeta.Labels["kufast/defaultTarget"] != "" {
-		newConfig.Contexts["default-context"].Namespace = tenantName + "-" + tenant.ObjectMeta.Labels["kufast/defaultTarget"]
+	if tenant.ObjectMeta.Labels[KUFAST_TENANT_DEFAULT_LABEL] != "" {
+		newConfig.Contexts["default-context"].Namespace = tenantName + "-" + tenant.ObjectMeta.Labels[KUFAST_TENANT_DEFAULT_LABEL]
 	}
 
 	err = clientcmd.WriteToFile(newConfig, out+"/"+tenantName+".kubeconfig")

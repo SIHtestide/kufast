@@ -170,10 +170,10 @@ func GetTenantTargetNameFromCmd(cmd *cobra.Command) (string, error) {
 
 	if tenantName != "" && targetName != "" {
 		namespaceName = tenantName + "-" + targetName
-	} else if tenantName != "" {
+	} else if targetName != "" {
 		tenantName = tools.GetTenantFromNamespace(namespaceName)
 		namespaceName = tenantName + "-" + targetName
-	} else if targetName != "" {
+	} else if tenantName != "" {
 		defaultTargetName, err := GetTenantDefaultTargetNameFromCmd(cmd)
 		if err != nil {
 			return "", err

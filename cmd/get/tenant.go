@@ -11,7 +11,7 @@ import (
 
 // getCmd represents the get command
 var getTenantCmd = &cobra.Command{
-	Use:   "secret <secret>",
+	Use:   "tenant <tenant name>",
 	Short: "Gain information about a deployed pod.",
 	Long:  `Gain information about a deployed pod.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -35,7 +35,7 @@ var getTenantCmd = &cobra.Command{
 		var nodeTargets []string
 
 		for _, target := range targets {
-			if target.AccessType == "node" {
+			if target.AccessType == "group" {
 				groupTargets = append(groupTargets, target.Name)
 			} else {
 				nodeTargets = append(nodeTargets, target.Name)

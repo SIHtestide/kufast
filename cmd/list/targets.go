@@ -40,5 +40,6 @@ var listTargetsCmd = &cobra.Command{
 func init() {
 	listCmd.AddCommand(listTargetsCmd)
 	listTargetsCmd.PersistentFlags().BoolP("all", "a", false, "List the users for all namespaces, instead for a specific one.")
-
+	listTargetsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	listTargetsCmd.MarkFlagsMutuallyExclusive("all", "tenant")
 }

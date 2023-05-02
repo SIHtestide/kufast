@@ -36,8 +36,8 @@ func CreatePod(cmd *cobra.Command, args []string) <-chan string {
 
 			podObject := objectFactory.NewPod(args[0], args[1], namespaceName, secrets, deploySecret, cpu, ram, storage, keepAlive)
 
-			_, err2 := clientset.CoreV1().Pods(namespaceName).Create(context.TODO(), podObject, metav1.CreateOptions{})
-			if err2 != nil {
+			_, err := clientset.CoreV1().Pods(namespaceName).Create(context.TODO(), podObject, metav1.CreateOptions{})
+			if err != nil {
 				res <- err.Error()
 				return
 			}
