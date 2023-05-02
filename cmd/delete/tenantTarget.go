@@ -80,7 +80,7 @@ Please use with care! Deleted data cannot be restored.`,
 				s.Start()
 			}
 			s.Stop()
-			fmt.Println("Done!")
+			fmt.Println(tools.MESSAGE_DONE)
 
 		}
 

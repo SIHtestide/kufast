@@ -1,7 +1,6 @@
 package get
 
 import (
-	"fmt"
 	"kufast/cmd"
 
 	"github.com/spf13/cobra"
@@ -13,7 +12,7 @@ var getCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("get called")
+		_ = cmd.Help()
 	},
 }
 

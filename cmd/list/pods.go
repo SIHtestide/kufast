@@ -1,10 +1,9 @@
 package list
 
 import (
-	"context"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 )
@@ -16,20 +15,12 @@ var listPodsCmd = &cobra.Command{
 	Long: `List all pods in your namespace. The overview contains information about the status of your pod and its name
 To gain further information see the kubectl get pod command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//Initial config block
-		ns, err := tools.GetNamespaceFromUserConfig(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
 
-		clientset, _, err := tools.GetUserClient(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
+		s := tools.CreateStandardSpinner(tools.MESSAGE_GET_OBJECTS)
 
-		//execute request
-		pods, err := clientset.CoreV1().Pods(ns).List(context.TODO(), metav1.ListOptions{})
+		pods, err := clusterOperations.ListTenantPods(cmd)
 		if err != nil {
+			s.Stop()
 			tools.HandleError(err, cmd)
 		}
 
@@ -37,10 +28,11 @@ To gain further information see the kubectl get pod command.`,
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"NAME", "NAMESPACE", "STATUS", "MESSAGE"})
-		for _, pod := range pods.Items {
+		for _, pod := range pods {
 			t.AppendRow(table.Row{pod.Name, pod.Namespace, pod.Status.Phase, pod.Status.Message})
 
 		}
+		s.Stop()
 		t.AppendSeparator()
 		t.Render()
 	},

@@ -29,7 +29,7 @@ on the cluster.`,
 		}
 
 		s.Stop()
-		fmt.Println("Complete!")
+		fmt.Println(tools.MESSAGE_DONE)
 
 	},
 }

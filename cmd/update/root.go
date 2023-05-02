@@ -1,7 +1,6 @@
 package update
 
 import (
-	"fmt"
 	"kufast/cmd"
 
 	"github.com/spf13/cobra"
@@ -13,7 +12,7 @@ var updateCmd = &cobra.Command{
 	Short: "Update a resource",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		_ = cmd.Help()
 	},
 }
 

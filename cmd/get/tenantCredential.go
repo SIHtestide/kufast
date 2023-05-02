@@ -2,6 +2,7 @@ package get
 
 import (
 	"errors"
+	"fmt"
 	"github.com/spf13/cobra"
 	"kufast/tools"
 )
@@ -25,6 +26,8 @@ var getTenantCredsCmd = &cobra.Command{
 		}
 
 		s.Stop()
+		fmt.Println(tools.MESSAGE_DONE)
+
 	},
 }
 

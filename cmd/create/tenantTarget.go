@@ -54,7 +54,7 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		}
 
 		s.Stop()
-		fmt.Println("Done!")
+		fmt.Println(tools.MESSAGE_DONE)
 
 	},
 }

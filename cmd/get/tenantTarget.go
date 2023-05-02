@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+	"errors"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,6 +17,13 @@ var getNamespaceCmd = &cobra.Command{
 	Short: "Get information about about a namespace",
 	Long:  `Get information about about a namespace.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		if len(args) != 1 {
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
+		}
+
+		s := tools.CreateStandardSpinner(tools.MESSAGE_GET_OBJECTS)
+
 		//Initial config block
 		clientset, _, err := tools.GetUserClient(cmd)
 		if err != nil {
@@ -73,6 +81,7 @@ var getNamespaceCmd = &cobra.Command{
 		t.AppendRow(table.Row{"# Users", len(users.Items)})
 		t.AppendRow(table.Row{"# Pods", len(pods.Items)})
 
+		s.Stop()
 		t.AppendSeparator()
 		t.Render()
 	},

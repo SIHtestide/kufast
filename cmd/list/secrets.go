@@ -1,10 +1,9 @@
 package list
 
 import (
-	"context"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 )
@@ -16,20 +15,12 @@ var listSecretsCmd = &cobra.Command{
 	Long: `List all secrets in your namespace. The overview contains information about the nameof the secret and its creation date
 To gain further information see the kubectl get pod command.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//Initial config block
-		ns, err := tools.GetNamespaceFromUserConfig(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
 
-		clientset, _, err := tools.GetUserClient(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
+		s := tools.CreateStandardSpinner(tools.MESSAGE_GET_OBJECTS)
 
-		//execute request
-		secrets, err := clientset.CoreV1().Secrets(ns).List(context.TODO(), metav1.ListOptions{})
+		secrets, err := clusterOperations.ListSecrets(cmd)
 		if err != nil {
+			s.Stop()
 			tools.HandleError(err, cmd)
 		}
 
@@ -37,9 +28,11 @@ To gain further information see the kubectl get pod command.`,
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"NAME", "NAMESPACE", "TYPE", "CREATED AT"})
-		for _, secret := range secrets.Items {
+		for _, secret := range secrets {
 			t.AppendRow(table.Row{secret.Name, secret.Namespace, secret.Type, secret.CreationTimestamp})
 		}
+
+		s.Stop()
 		t.AppendSeparator()
 		t.Render()
 	},
@@ -48,13 +41,4 @@ To gain further information see the kubectl get pod command.`,
 func init() {
 	listCmd.AddCommand(listSecretsCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

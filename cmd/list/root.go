@@ -1,7 +1,6 @@
 package list
 
 import (
-	"fmt"
 	"kufast/cmd"
 
 	"github.com/spf13/cobra"
@@ -13,7 +12,7 @@ var listCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		_ = cmd.Help()
 	},
 }
 
@@ -24,8 +23,6 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	listCmd.PersistentFlags().BoolP("all-namespaces", "a", false, "List the users for all namespaces, instead for a specific one.")
-	listCmd.MarkFlagsMutuallyExclusive("namespace", "all-namespaces")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
