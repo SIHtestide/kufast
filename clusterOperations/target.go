@@ -10,11 +10,6 @@ import (
 	"strings"
 )
 
-type Target struct {
-	Name       string
-	AccessType string
-}
-
 func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 	if strings.Contains(target, "_") {
 		return false
@@ -32,26 +27,26 @@ func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 	return false
 }
 
-func GetTargetFromTargetName(cmd *cobra.Command, target string, all bool) (Target, error) {
+func GetTargetFromTargetName(cmd *cobra.Command, target string, all bool) (tools.Target, error) {
 	targets, err := ListTargetsFromCmd(cmd, all)
 	if err != nil {
-		return Target{}, err
+		return tools.Target{}, err
 	}
 	for _, t := range targets {
 		if t.Name == target {
 			return t, nil
 		}
 	}
-	return Target{}, errors.New("the target does not exist or the tenant has no access to the target")
+	return tools.Target{}, errors.New("the target does not exist or the tenant has no access to the target")
 }
 
-func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]Target, error) {
+func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]tools.Target, error) {
 
 	clientset, _, err := tools.GetUserClient(cmd)
 	if err != nil {
 		return nil, err
 	}
-	var results []Target
+	var results []tools.Target
 
 	//Do we want the target of the user or all?
 	if all {
@@ -64,7 +59,7 @@ func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]T
 		var groups []string
 		for _, node := range nodes.Items {
 			//Append node target
-			results = append(results, Target{
+			results = append(results, tools.Target{
 				Name:       node.ObjectMeta.Labels[tools.KUFAST_NODE_HOSTNAME_LABEL],
 				AccessType: "node",
 			})
@@ -76,7 +71,7 @@ func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]T
 		}
 		for _, target := range groups {
 			if target != "" {
-				results = append(results, Target{
+				results = append(results, tools.Target{
 					Name:       target,
 					AccessType: "group",
 				})
@@ -89,12 +84,12 @@ func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]T
 
 		for key, elem := range user.ObjectMeta.Labels {
 			if strings.Contains(tools.KUFAST_TENANT_GROUPACCESS_LABEL, key) && elem == "true" {
-				results = append(results, Target{
+				results = append(results, tools.Target{
 					Name:       strings.TrimPrefix(key, tools.KUFAST_TENANT_GROUPACCESS_LABEL),
 					AccessType: "group",
 				})
 			} else if strings.Contains(tools.KUFAST_TENANT_NODEACCESS_LABEL, key) && elem != "false" {
-				results = append(results, Target{
+				results = append(results, tools.Target{
 					Name:       strings.TrimPrefix(key, tools.KUFAST_TENANT_NODEACCESS_LABEL),
 					AccessType: "node",
 				})
@@ -105,7 +100,7 @@ func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]T
 
 }
 
-func ListTargetsFromCmd(cmd *cobra.Command, all bool) ([]Target, error) {
+func ListTargetsFromCmd(cmd *cobra.Command, all bool) ([]tools.Target, error) {
 
 	//Get the information from the tenant
 	namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)

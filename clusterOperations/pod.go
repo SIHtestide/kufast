@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/spf13/cobra"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kufast/objectFactory"
 	"kufast/tools"
@@ -97,4 +98,54 @@ func DeletePod(cmd *cobra.Command, pod string) <-chan string {
 	}()
 
 	return res
+}
+
+func GetPod(podName string, cmd *cobra.Command) (*v1.Pod, error) {
+	//Initial config block
+	namespaceName, err := GetTenantTargetNameFromCmd(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	//execute request
+	pod, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), podName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return pod, nil
+}
+
+func ListTenantPods(cmd *cobra.Command) ([]v1.Pod, error) {
+
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	targets, err := ListTargetsFromCmd(cmd, false)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantName, err := GetTenantNameFromCmd(cmd)
+	if err != nil {
+		return nil, err
+	}
+	var results []v1.Pod
+	for _, target := range targets {
+		list, err := clientset.CoreV1().Pods(tenantName+"-"+target.Name).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, list.Items...)
+	}
+
+	return results, nil
+
 }

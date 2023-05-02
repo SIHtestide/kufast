@@ -5,13 +5,14 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 )
 
 // getCmd represents the get command
 var getNamespaceCmd = &cobra.Command{
-	Use:   "namespace <namespace>",
+	Use:   "tenant-target <tenant-target>",
 	Short: "Get information about about a namespace",
 	Long:  `Get information about about a namespace.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -21,22 +22,29 @@ var getNamespaceCmd = &cobra.Command{
 			tools.HandleError(err, cmd)
 		}
 
-		nameSpace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), args[0], metav1.GetOptions{})
+		tenantName, err := clusterOperations.GetTenantNameFromCmd(cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
 
-		quota, err := clientset.CoreV1().ResourceQuotas(args[0]).Get(context.TODO(), args[0]+"-limits", metav1.GetOptions{})
+		tenantTargetName := tenantName + "-" + args[0]
+
+		nameSpace, err := clientset.CoreV1().Namespaces().Get(context.TODO(), tenantTargetName, metav1.GetOptions{})
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
 
-		users, err := clientset.CoreV1().ServiceAccounts(args[0]).List(context.TODO(), metav1.ListOptions{})
+		quota, err := clientset.CoreV1().ResourceQuotas(tenantTargetName).Get(context.TODO(), tenantTargetName+"-limits", metav1.GetOptions{})
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
 
-		pods, err := clientset.CoreV1().Pods(args[0]).List(context.TODO(), metav1.ListOptions{})
+		users, err := clientset.CoreV1().ServiceAccounts(tenantTargetName).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
+
+		pods, err := clientset.CoreV1().Pods(tenantTargetName).List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
@@ -73,13 +81,6 @@ var getNamespaceCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getNamespaceCmd)
 
-	// Here you will define your flags and configuration settings.
+	getSecretCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

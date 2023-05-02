@@ -42,7 +42,13 @@ func CreateTenantTarget(tenantName string, targetName string, cmd *cobra.Command
 			return
 		}
 
-		_, err = clientset.CoreV1().Namespaces().Create(context.TODO(), objectFactory.NewNamespace(tenantName, targetName, cmd), metav1.CreateOptions{})
+		target, err := GetTargetFromTargetName(cmd, targetName, true)
+		if err != nil {
+			res <- err.Error()
+			return
+		}
+
+		_, err = clientset.CoreV1().Namespaces().Create(context.TODO(), objectFactory.NewNamespace(tenantName, target, cmd), metav1.CreateOptions{})
 		if err != nil {
 			res <- err.Error()
 			return

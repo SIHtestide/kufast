@@ -1,10 +1,10 @@
 package get
 
 import (
-	"context"
+	"errors"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 )
@@ -15,19 +15,14 @@ var getPodCmd = &cobra.Command{
 	Short: "Gain information about a deployed pod.",
 	Long:  `Gain information about a deployed pod.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//Initial config block
-		namespaceName, err := tools.GetNamespaceFromUserConfig(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
+
+		if len(args) != 1 {
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
-		clientset, _, err := tools.GetUserClient(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
+		s := tools.CreateStandardSpinner(tools.MESSAGE_GET_OBJECTS)
 
-		//execute request
-		pod, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), args[0], metav1.GetOptions{})
+		pod, err := clusterOperations.GetPod(args[0], cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
@@ -54,6 +49,7 @@ var getPodCmd = &cobra.Command{
 		t.AppendRow(table.Row{"Deployed Image", pod.Spec.Containers[0].Image})
 		t.AppendRow(table.Row{"Restart Policy", pod.Spec.RestartPolicy})
 
+		s.Stop()
 		t.AppendSeparator()
 		t.Render()
 
@@ -62,4 +58,7 @@ var getPodCmd = &cobra.Command{
 
 func init() {
 	getCmd.AddCommand(getPodCmd)
+
+	getLogsCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	getLogsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	v1 "k8s.io/api/core/v1"
+	"kufast/clusterOperations"
 	"kufast/tools"
 )
 
@@ -16,7 +17,7 @@ var getLogsCmd = &cobra.Command{
 	Long:  `.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//Initial config block
-		namespaceName, err := tools.GetNamespaceFromUserConfig(cmd)
+		namespaceName, err := clusterOperations.GetTenantTargetNameFromCmd(cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
@@ -66,13 +67,7 @@ var getLogsCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getLogsCmd)
 
-	// Here you will define your flags and configuration settings.
+	getLogsCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	getLogsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

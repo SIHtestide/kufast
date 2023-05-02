@@ -10,7 +10,7 @@ import (
 	"kufast/tools"
 )
 
-func NewNamespace(tenantName string, targetName string, cmd *cobra.Command) *v1.Namespace {
+func NewNamespace(tenantName string, target tools.Target, cmd *cobra.Command) *v1.Namespace {
 	var newNamespace *v1.Namespace
 	newNamespace = &v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
@@ -18,7 +18,7 @@ func NewNamespace(tenantName string, targetName string, cmd *cobra.Command) *v1.
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        tenantName + "-" + targetName,
+			Name:        tenantName + "-" + target.Name,
 			Annotations: map[string]string{},
 			Labels: map[string]string{
 				"kufast/tenant": tenantName,
@@ -27,8 +27,6 @@ func NewNamespace(tenantName string, targetName string, cmd *cobra.Command) *v1.
 		Spec:   v1.NamespaceSpec{},
 		Status: v1.NamespaceStatus{},
 	}
-
-	target := tools.GetTargetFromTargetName(cmd, targetName, true)
 
 	if target.AccessType == "node" {
 		newNamespace.ObjectMeta.Annotations["scheduler.alpha.kubernetes.io/node-selector"] = "kubernetes.io/hostname=" + target.Name
@@ -277,7 +275,7 @@ func NewTenantDefaultRoleBinding(tenantName string) *v12.RoleBinding {
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      tenantName + "-defaultrole",
+			Name:      tenantName + "-defaultrolebinding",
 			Namespace: tenantName,
 			Labels: map[string]string{
 				"kufast/tenant": tenantName,

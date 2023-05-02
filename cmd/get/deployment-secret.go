@@ -1,11 +1,10 @@
 package get
 
 import (
-	"context"
 	"errors"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kufast/clusterOperations"
 	"kufast/tools"
 	"os"
 )
@@ -16,19 +15,14 @@ var getDeploySecretCmd = &cobra.Command{
 	Short: "Gain information about a deployed pod.",
 	Long:  `Gain information about a deployed pod.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//Initial config block
-		namespaceName, err := tools.GetNamespaceFromUserConfig(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
+
+		if len(args) != 1 {
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
-		clientset, _, err := tools.GetUserClient(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
+		s := tools.CreateStandardSpinner(tools.MESSAGE_GET_OBJECTS)
 
-		//execute request
-		secret, err := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), args[0], metav1.GetOptions{})
+		secret, err := clusterOperations.GetSecret(args[0], cmd)
 		if err != nil {
 			tools.HandleError(err, cmd)
 		}
@@ -45,6 +39,7 @@ var getDeploySecretCmd = &cobra.Command{
 		t.AppendRow(table.Row{"Namespace", secret.Namespace})
 		t.AppendRow(table.Row{"Data", string(secret.Data[".dockerconfigjson"])})
 
+		s.Stop()
 		t.AppendSeparator()
 		t.Render()
 
@@ -53,4 +48,7 @@ var getDeploySecretCmd = &cobra.Command{
 
 func init() {
 	getCmd.AddCommand(getDeploySecretCmd)
+
+	getDeploySecretCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
+	getDeploySecretCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
 }

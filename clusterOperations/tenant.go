@@ -36,7 +36,30 @@ func CreateTenant(tenantName string, cmd *cobra.Command) error {
 	return nil
 }
 
-func DeleteTenant
+func DeleteTenant(tenantName string, cmd *cobra.Command) error {
+	//Configblock
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return err
+	}
+
+	err = clientset.CoreV1().ServiceAccounts("default").Delete(context.TODO(), tenantName+"-user", metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	err = clientset.RbacV1().Roles("default").Delete(context.TODO(), tenantName+"-defaultrole", metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	err = clientset.RbacV1().RoleBindings("default").Delete(context.TODO(), tenantName+"-defaultrolebinding", metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func GetTenantNameFromCmd(cmd *cobra.Command) (string, error) {
 	tenant, _ := cmd.Flags().GetString("tenant")

@@ -51,21 +51,17 @@ Please use with care! Deleted data cannot be restored.`,
 						s.Stop()
 						fmt.Println(res)
 						s.Start()
+						errorInDeletion = true
 					}
 				}
 				if errorInDeletion {
 					continue
 				}
 
-				clusterOperations.DeleteTe
-			}
-
-			for _, user := range args {
-				deleteOps = append(deleteOps, clusterOperations.DeleteTenant(tenant, cmd))
-			}
-
-			for _, op := range deleteOps {
-				results = append(results, <-op)
+				err = clusterOperations.DeleteTenant(tenantName, cmd)
+				if err != nil {
+					tools.HandleError(err, cmd)
+				}
 			}
 
 			s.Stop()

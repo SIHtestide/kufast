@@ -3,6 +3,7 @@ package clusterOperations
 import (
 	"context"
 	"github.com/spf13/cobra"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kufast/objectFactory"
 	"kufast/tools"
@@ -64,6 +65,56 @@ func CreateSecret(secretName string, secretData string, cmd *cobra.Command) erro
 		return err
 	}
 	return nil
+}
+
+func GetSecret(secretName string, cmd *cobra.Command) (*v1.Secret, error) {
+	//Initial config block
+	namespaceName, err := GetTenantTargetNameFromCmd(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	//execute request
+	secret, err := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), secretName, metav1.GetOptions{})
+	if err != nil {
+		tools.HandleError(err, cmd)
+	}
+
+	return secret, nil
+}
+
+func ListSecrets(cmd *cobra.Command) ([]v1.Secret, error) {
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	tenantName, err := GetTenantNameFromCmd(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	targets, err := ListTargetsFromCmd(cmd, false)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []v1.Secret
+	for _, target := range targets {
+		list, err := clientset.CoreV1().Secrets(tenantName+"-"+target.Name).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, list.Items...)
+	}
+
+	return results, nil
+
 }
 
 func DeleteSecret(secretName string, cmd *cobra.Command) <-chan string {

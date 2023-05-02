@@ -1,11 +1,9 @@
 package get
 
 import (
-	"github.com/briandowns/spinner"
+	"errors"
 	"github.com/spf13/cobra"
 	"kufast/tools"
-	"os"
-	"time"
 )
 
 var getTenantCredsCmd = &cobra.Command{
@@ -13,15 +11,18 @@ var getTenantCredsCmd = &cobra.Command{
 	Short: "Generate tenant credentials for specific tenant.",
 	Long:  `Generate tenant credentials for specific user. Can only be used by admins.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		clientset, client, err := tools.GetUserClient(cmd)
-		if err != nil {
-			tools.HandleError(err, cmd)
+
+		if len(args) != 1 {
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
-		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = "Creating Objects - Please wait!  "
-		s.Start()
-		tools.WriteNewUserYamlToFile(args[0], client, clientset, cmd, s)
+		s := tools.CreateStandardSpinner(tools.MESSAGE_GET_OBJECTS)
+
+		err := tools.WriteNewUserYamlToFile(args[0], cmd, s)
+		if err != nil {
+			s.Stop()
+			tools.HandleError(err, cmd)
+		}
 
 		s.Stop()
 	},
@@ -30,15 +31,6 @@ var getTenantCredsCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getTenantCredsCmd)
 	getTenantCredsCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
-	getTenantCredsCmd.MarkFlagRequired("output")
+	_ = getTenantCredsCmd.MarkFlagRequired("output")
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// getCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
