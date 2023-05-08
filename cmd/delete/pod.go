@@ -59,7 +59,7 @@ var deletePodCmd = &cobra.Command{
 func init() {
 	deleteCmd.AddCommand(deletePodCmd)
 
-	deletePodCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	deletePodCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	deletePodCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	deletePodCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 
 }

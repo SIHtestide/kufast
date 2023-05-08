@@ -60,8 +60,8 @@ func init() {
 	createCmd.AddCommand(createDeploySecretCmd)
 
 	//target and tenant for the operation can be specified
-	createDeploySecretCmd.Flags().StringP("target", "", "", "The tenant-target for the deploy-secret (Needs to be the same as the pod using it.")
-	createDeploySecretCmd.Flags().StringP("tenant", "", "", "The tenant for this operation")
+	createDeploySecretCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET+" (Needs to be the same as the pod using it).")
+	createDeploySecretCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 
 	//Input is required to get the secret
 	createDeploySecretCmd.Flags().StringP("input", "", "", "Path to your .dockerconfigfile to read credentials from.")

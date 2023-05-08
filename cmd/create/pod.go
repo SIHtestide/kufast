@@ -75,12 +75,12 @@ func init() {
 	createPodCmd.Flags().StringP("memory", "", "500Mi", "The amount of RAM the pod can use")
 	createPodCmd.Flags().StringP("cpu", "", "500m", "The amount of CPU the pod can use")
 	createPodCmd.Flags().StringP("storage", "", "1Gi", "The amount of storage the pod can use")
-	createPodCmd.Flags().StringP("target", "", "", "The name of the node or group to deploy the pod to")
 	createPodCmd.Flags().StringP("deploy-secret", "d", "", "The name of the deployment secret to deploy this container. This secret will be used to pull the image.")
 	createPodCmd.Flags().StringArrayP("secrets", "s", []string{}, "List of secret names to be introduced in the container "+
 		"as environment variables. The variable name will equal the name of the secret. Can be specified multiple times.")
 	createPodCmd.Flags().Int32SliceP("port", "p", []int32{}, "A port the pod should expose. Can be specified multiple times.")
 	createPodCmd.Flags().StringArrayP("cmd", "", []string{}, "An initial command to be issued at pod start. Required by a few containers.")
 
-	createPodCmd.Flags().StringP("tenant", "", "", "The name of the tenant to be used to deploy the pod")
+	createPodCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	createPodCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 }

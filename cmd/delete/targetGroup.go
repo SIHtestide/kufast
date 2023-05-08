@@ -11,9 +11,9 @@ import (
 // deleteTargetGroupCmd represents the delete target-group command
 var deleteTargetGroupCmd = &cobra.Command{
 	Use:   "target-group <target-group>..",
-	Short: "Delete a user and his credentials.",
-	Long: `Delete a user and his credentials. This operation can only be executed by a cluster admin.
-Please use with care! Deleted data cannot be restored.`,
+	Short: "Deletes a target-group from the cluster.",
+	Long: `Deletes a target-group from the cluster. This operation can only be executed by a cluster admin.
+Please use with care! Tenant-targets pointing to these target-groups remain intact, but cannot deploy new pods.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//Check that exactly one arg has been provided (the namespace)
 		if len(args) < 1 {
@@ -35,7 +35,7 @@ Please use with care! Deleted data cannot be restored.`,
 			}
 
 			s.Stop()
-			fmt.Println("Done!")
+			fmt.Println(tools.MESSAGE_DONE)
 
 		}
 	},
@@ -45,7 +45,7 @@ Please use with care! Deleted data cannot be restored.`,
 func init() {
 	deleteCmd.AddCommand(deleteTargetGroupCmd)
 
-	deleteTargetGroupCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	deleteTargetGroupCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	deleteTargetGroupCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	deleteTargetGroupCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 
 }

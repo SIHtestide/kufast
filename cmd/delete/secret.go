@@ -11,9 +11,9 @@ import (
 // deleteSecretCmd represents the delete secret command
 var deleteSecretCmd = &cobra.Command{
 	Use:   "secret <secret>..",
-	Short: "Delete a user and his credentials.",
-	Long: `Delete a user and his credentials. This operation can only be executed by a cluster admin.
-Please use with care! Deleted data cannot be restored.`,
+	Short: "Deletes a secret from a tenant-target.",
+	Long: `Deletes a secret from a tenant-target.
+Please use with care! Deleted data cannot be restored. Can be used for normal secrets and deploy-secrets.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//Check that exactly one arg has been provided (the namespace)
 		if len(args) < 1 {
@@ -56,7 +56,7 @@ Please use with care! Deleted data cannot be restored.`,
 func init() {
 	deleteCmd.AddCommand(deleteSecretCmd)
 
-	deleteSecretCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	deleteSecretCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	deleteSecretCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	deleteSecretCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 
 }

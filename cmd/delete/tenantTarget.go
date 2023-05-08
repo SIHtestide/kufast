@@ -17,8 +17,8 @@ import (
 // deleteTenantTargetCmd represents the delete tenant-target command
 var deleteTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <tenant-target>",
-	Short: "Delete the namespace including all users and pods in it.",
-	Long: `Delete the namespace including all users and pods in it. This operation can only be executed by a cluster admin.
+	Short: "Delete tenant-targets of a tenant including all pods and secrets in it.",
+	Long: `Delete tenant-targets of a tenant including all pods and secrets in it. This operation can only be executed by a cluster admin.
 Please use with care! Deleted data cannot be restored.`,
 	Run: func(cmd *cobra.Command, args []string) {
 

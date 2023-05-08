@@ -11,8 +11,8 @@ import (
 // deleteTenantCmd represents the delete tenant command
 var deleteTenantCmd = &cobra.Command{
 	Use:   "tenant <tenant>..",
-	Short: "Delete tenants, their namespaces and their credentials.",
-	Long: `Delete a user and his credentials. This operation can only be executed by a cluster admin.
+	Short: "Delete tenants, their tenant-targets, pods, secrets and their credentials.",
+	Long: `Delete tenants, their tenant-targets and their credentials. This operation can only be executed by a cluster admin.
 Please use with care! Deleted data cannot be restored.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//Check that at least one tenant has been provided

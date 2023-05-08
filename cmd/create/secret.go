@@ -58,7 +58,7 @@ func createSecretInteractive(cmd *cobra.Command) []string {
 func init() {
 	createCmd.AddCommand(createSecretCmd)
 
-	createSecretCmd.Flags().StringP("target", "", "", "The tenant-target for the secret (Needs to be the same as the pod using it.")
-	createSecretCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
+	createSecretCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET+" (Needs to be the same as the pod using it).")
+	createSecretCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 
 }
