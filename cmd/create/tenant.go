@@ -27,6 +27,12 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		s := tools.CreateStandardSpinner(tools.MESSAGE_CREATE_OBJECTS)
 
 		for _, tenantName := range args {
+			if !tools.IsAlphaNumeric(tenantName) {
+				s.Stop()
+				fmt.Println(tools.CreateAlphaNumericError(tenantName))
+				s.Start()
+				continue
+			}
 
 			err := clusterOperations.CreateTenant(tenantName, cmd)
 			if err != nil {
@@ -78,7 +84,7 @@ Write multiple names to create multiple namespaces at once. This command will fa
 }
 
 func createTenantInteractive(cmd *cobra.Command, args []string) []string {
-
+	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
 	return args
 }
 

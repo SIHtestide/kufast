@@ -16,6 +16,11 @@ var createTargetGroupCmd = &cobra.Command{
 Upon completion, the command yields the users credentials. This command will fail, if you do not have admin rights 
 on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		isInteractive, _ := cmd.Flags().GetBool("interactive")
+		if isInteractive {
+			args = createTargetGroupInteractive(cmd, args)
+		}
+
 		if len(args) < 2 {
 			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
@@ -31,6 +36,11 @@ on the cluster.`,
 		fmt.Println(tools.MESSAGE_DONE)
 
 	},
+}
+
+func createTargetGroupInteractive(cmd *cobra.Command, args []string) []string {
+	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
+	return args
 }
 
 func init() {

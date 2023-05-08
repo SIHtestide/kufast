@@ -8,7 +8,7 @@ import (
 	"kufast/tools"
 )
 
-// createCmd represents the create command
+// createSecretCmd represents the create command
 var createSecretCmd = &cobra.Command{
 	Use:   "secret name",
 	Short: "Create a new environment secret in this namespace",
@@ -16,6 +16,10 @@ var createSecretCmd = &cobra.Command{
 Upon completion, the command yields the users credentials. This command will fail, if you do not have admin rights 
 on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		isInteractive, _ := cmd.Flags().GetBool("interactive")
+		if isInteractive {
+			args = createSecretInteractive(cmd, args)
+		}
 
 		if len(args) != 1 {
 			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
@@ -36,6 +40,11 @@ on the cluster.`,
 		fmt.Println(tools.MESSAGE_DONE)
 
 	},
+}
+
+func createSecretInteractive(cmd *cobra.Command, args []string) []string {
+	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
+	return args
 }
 
 func init() {

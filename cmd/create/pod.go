@@ -53,6 +53,7 @@ func init() {
 }
 
 func createPodInteractive(cmd *cobra.Command, args []string) []string {
+	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
 	fmt.Println("This routine will create a new pod for you. Please note that your credentials must be available" +
 		"according to our Readme and you need to hand over secrets, ports and an init command through the command line arguments" +
 		"if you intend to use them. More information is available under 'kufast get pod --help'")

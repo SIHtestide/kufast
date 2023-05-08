@@ -12,9 +12,6 @@ var listCmd = &cobra.Command{
 	Short: "List kufast objects",
 	Long: `The list subcommand is a collection of all list operations available in kufast.
 Use these features to list tenants, pods and more.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
-	},
 }
 
 func init() {

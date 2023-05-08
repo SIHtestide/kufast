@@ -14,3 +14,7 @@ const MESSAGE_GET_OBJECTS = "Getting objects.. Please wait!"
 
 // MESSAGE_CREATE_OBJECTS returns the standard message displayed when completing an operation
 const MESSAGE_DONE = "Complete!"
+
+// MESSAGE_INTERACTIVE_IGNORE_INPUT
+const MESSAGE_INTERACTIVE_IGNORE_INPUT = `Please note: Interactive mode will ignore all arguments, you entered, 
+but will retain flag values`

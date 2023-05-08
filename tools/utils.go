@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
 	"os"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -138,4 +139,8 @@ func CreateStandardSpinner(message string) *spinner.Spinner {
 	s.Start()
 
 	return s
+}
+
+func IsAlphaNumeric(s string) bool {
+	return regexp.MustCompile(`^[a-zA-Z0-9]*$`).MatchString(s)
 }

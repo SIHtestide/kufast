@@ -11,7 +11,7 @@ import (
 // createCmd represents the create command
 var createTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <target>..",
-	Short: "Create one or more new namespaces for tenants",
+	Short: "Create one or more tenant-targets for one tenant.",
 	Long: `This command creates a new namespace for a tenant. You can select the name and set limits to the namespace.
 Write multiple names to create multiple namespaces at once. This command will fail, if you do not have admin rights on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -68,6 +68,22 @@ Write multiple names to create multiple namespaces at once. This command will fa
 }
 
 func createTenantTargetInteractive(cmd *cobra.Command, args []string) []string {
+	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
+	if len(args) == 0 {
+		for true {
+			namespaceName := tools.GetDialogAnswer("What should be the name for the new namespace?")
+			args = append(args, namespaceName)
+			continueNamespaces := tools.GetDialogAnswer("Do you want to add another namespace (yes/no)?")
+			if continueNamespaces != "yes" {
+				break
+			}
+		}
+		limitCpu := tools.GetDialogAnswer("Which CPU limit do you want to set for the namespace(es)? (e.g. 1, 500m)")
+		_ = cmd.Flags().Set("limit-cpu", limitCpu)
+		limitMemory := tools.GetDialogAnswer("Which Memory limit do you want to set for the namespace(es)? (e.g. 100Mi, 5Gi)")
+		_ = cmd.Flags().Set("limit-memory", limitMemory)
+
+	}
 	return args
 }
 
@@ -86,23 +102,4 @@ func init() {
 	_ = createTenantTargetCmd.MarkFlagDirname("output")
 	_ = createTenantTargetCmd.MarkFlagRequired("tenant")
 
-}
-
-func createNamespaceInteractive(cmd *cobra.Command, args []string) []string {
-	if len(args) == 0 {
-		for true {
-			namespaceName := tools.GetDialogAnswer("What should be the name for the new namespace?")
-			args = append(args, namespaceName)
-			continueNamespaces := tools.GetDialogAnswer("Do you want to add another namespace (yes/no)?")
-			if continueNamespaces != "yes" {
-				break
-			}
-		}
-		limitCpu := tools.GetDialogAnswer("Which CPU limit do you want to set for the namespace(es)? (e.g. 1, 500m)")
-		_ = cmd.Flags().Set("limit-cpu", limitCpu)
-		limitMemory := tools.GetDialogAnswer("Which Memory limit do you want to set for the namespace(es)? (e.g. 100Mi, 5Gi)")
-		_ = cmd.Flags().Set("limit-memory", limitMemory)
-
-	}
-	return args
 }
