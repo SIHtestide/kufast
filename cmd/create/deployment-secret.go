@@ -40,7 +40,7 @@ func init() {
 
 	createDeploySecretCmd.Flags().StringP("input", "", "", "Path to your .dockerfile to read credentials from.")
 	createDeploySecretCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
-	createDeploySecretCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
+	createDeploySecretCmd.Flags().StringP("tenant", "", "", "The tenant for this operation")
 	createDeploySecretCmd.MarkFlagRequired("input")
 	createDeploySecretCmd.MarkFlagFilename("input", "json")
 

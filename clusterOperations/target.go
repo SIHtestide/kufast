@@ -3,6 +3,7 @@ package clusterOperations
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/strings/slices"
@@ -14,7 +15,6 @@ func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 	if strings.Contains(target, "_") {
 		return false
 	}
-
 	targets, err := ListTargetsFromCmd(cmd, all)
 	if err != nil {
 		return false
@@ -121,6 +121,8 @@ func ListTargetsFromCmd(cmd *cobra.Command, all bool) ([]tools.Target, error) {
 
 	//Get the information from the tenant
 	namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
+	fmt.Println(namespaceName)
+	fmt.Println("namespaceName")
 	tenant, _ := cmd.Flags().GetString("tenant")
 	if tenant == "" {
 		tenant = tools.GetTenantFromNamespace(namespaceName)

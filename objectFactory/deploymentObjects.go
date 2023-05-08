@@ -1,3 +1,4 @@
+// objectFactory builds new objects to be deployed to the cluster based on input parameters.
 package objectFactory
 
 import (
@@ -6,8 +7,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// NewPod creates a new Kubernetes pod object based on several parameters.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewPod(podName string, imageName string, namespaceName string,
-	attachedSecrets []string, deploySecret string, cpu string, ram string, storage string, shouldRestart bool) *v1.Pod {
+	attachedSecrets []string, deploySecret string, cpu string, ram string, storage string, shouldRestart bool, ports []int32, command []string) *v1.Pod {
 
 	var newPod *v1.Pod
 	newPod = &v1.Pod{
@@ -27,12 +30,13 @@ func NewPod(podName string, imageName string, namespaceName string,
 				{
 					Name:    podName,
 					Image:   imageName,
-					Command: []string{"/bin/sleep", "3650d"},
+					Command: command,
 					Resources: v1.ResourceRequirements{
 						Limits:   v1.ResourceList{},
 						Requests: v1.ResourceList{},
 					},
-					Env: []v1.EnvVar{},
+					Ports: []v1.ContainerPort{},
+					Env:   []v1.EnvVar{},
 				},
 			},
 		},
@@ -66,6 +70,13 @@ func NewPod(podName string, imageName string, namespaceName string,
 		newPod.Spec.RestartPolicy = v1.RestartPolicyAlways
 	}
 
+	for _, port := range ports {
+		containerPort := v1.ContainerPort{
+			ContainerPort: port,
+		}
+		newPod.Spec.Containers[0].Ports = append(newPod.Spec.Containers[0].Ports, containerPort)
+	}
+
 	for _, secretName := range attachedSecrets {
 		newPod.Spec.Containers[0].Env = append(newPod.Spec.Containers[0].Env, v1.EnvVar{
 			Name: secretName,
@@ -92,6 +103,8 @@ func NewPod(podName string, imageName string, namespaceName string,
 
 }
 
+// NewSecret creates a new Kubernetes secret object based on several parameters.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewSecret(namespaceName string, secretName string, secretData string) *v1.Secret {
 	return &v1.Secret{
 		TypeMeta: metav1.TypeMeta{
@@ -109,6 +122,9 @@ func NewSecret(namespaceName string, secretName string, secretData string) *v1.S
 	}
 }
 
+// NewDeploymentSecret creates a new Kubernetes secret object based on several parameters. This secret
+// type can be used for Kubernetes deployments from private registries.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewDeploymentSecret(namespaceName string, secretName string, secretDataBase64 []byte) *v1.Secret {
 	return &v1.Secret{
 		TypeMeta: metav1.TypeMeta{

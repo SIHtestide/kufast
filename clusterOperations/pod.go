@@ -29,12 +29,14 @@ func CreatePod(cmd *cobra.Command, args []string) <-chan string {
 		target, _ := cmd.Flags().GetString("target")
 		secrets, _ := cmd.Flags().GetStringArray("secrets")
 		deploySecret, _ := cmd.Flags().GetString("deploy-secret")
+		ports, _ := cmd.Flags().GetInt32Slice("port")
+		podCmd, _ := cmd.Flags().GetStringArray("cmd")
 
 		namespaceName, err := GetTenantTargetNameFromCmd(cmd)
 
 		if target == "" || IsValidTarget(cmd, target, false) {
 
-			podObject := objectFactory.NewPod(args[0], args[1], namespaceName, secrets, deploySecret, cpu, ram, storage, keepAlive)
+			podObject := objectFactory.NewPod(args[0], args[1], namespaceName, secrets, deploySecret, cpu, ram, storage, keepAlive, ports, podCmd)
 
 			_, err := clientset.CoreV1().Pods(namespaceName).Create(context.TODO(), podObject, metav1.CreateOptions{})
 			if err != nil {

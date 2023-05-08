@@ -10,6 +10,8 @@ import (
 	"kufast/tools"
 )
 
+// NewNamespace creates a new Kubernetes namespace object based on several parameters.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewNamespace(tenantName string, target tools.Target, cmd *cobra.Command) *v1.Namespace {
 	var newNamespace *v1.Namespace
 	newNamespace = &v1.Namespace{
@@ -36,6 +38,8 @@ func NewNamespace(tenantName string, target tools.Target, cmd *cobra.Command) *v
 	return newNamespace
 }
 
+// NewLimitRange creates a new Kubernetes LimitRange object based on several parameters.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewLimitRange(namespaceName string, minStorage string, storage string) *v1.LimitRange {
 	var newRange *v1.LimitRange
 
@@ -75,6 +79,8 @@ func NewLimitRange(namespaceName string, minStorage string, storage string) *v1.
 	return newRange
 }
 
+// NewResourceQuota creates a new Kubernetes ResourceQouta object based on several parameters.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewResourceQuota(namespace string, ram string, cpu string, storage string, pods string) *v1.ResourceQuota {
 	var newQuota *v1.ResourceQuota
 	newQuota = &v1.ResourceQuota{
@@ -92,6 +98,7 @@ func NewResourceQuota(namespace string, ram string, cpu string, storage string, 
 			},
 		},
 	}
+	//Set parameters only if available
 	if ram != "" {
 		qty, err := resource.ParseQuantity(ram)
 		if err == nil {
@@ -125,6 +132,9 @@ func NewResourceQuota(namespace string, ram string, cpu string, storage string, 
 	return newQuota
 }
 
+// NewTenantUser creates a new Kubernetes ServiceAccount object based on several parameters.
+// This is the basis user for a kufast tenant
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewTenantUser(tenant string, namespaceName string) *v1.ServiceAccount {
 	return &v1.ServiceAccount{
 		TypeMeta: metav1.TypeMeta{
@@ -143,6 +153,9 @@ func NewTenantUser(tenant string, namespaceName string) *v1.ServiceAccount {
 
 }
 
+// NewRole creates a new Kubernetes Role object based on several parameters.
+// This role object is optimized for tenant targets.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewRole(namespaceName string) *v12.Role {
 	return &v12.Role{
 		TypeMeta: metav1.TypeMeta{
@@ -157,18 +170,21 @@ func NewRole(namespaceName string) *v12.Role {
 			{
 				APIGroups: []string{""},
 				Verbs:     []string{"get", "list", "watch", "update", "delete", "create"},
-				Resources: []string{"pods", "secrets"},
+				Resources: []string{"pods", "secrets", "pods/exec"},
 			},
 			{
 				APIGroups: []string{""},
 				Verbs:     []string{"get, list"},
-				Resources: []string{"pods/log"},
+				Resources: []string{"pods/log", "events"},
 			},
 		},
 	}
 
 }
 
+// NewNetworkPolicy creates a new Kubernetes NetworkPolicy object based on several parameters.
+// These network policies are preconfigured for Tenant Targets.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewNetworkPolicy(namespaceName string, tenant string) *n1.NetworkPolicy {
 
 	return &n1.NetworkPolicy{
@@ -188,7 +204,7 @@ func NewNetworkPolicy(namespaceName string, tenant string) *n1.NetworkPolicy {
 						{
 							NamespaceSelector: &metav1.LabelSelector{
 								MatchLabels: map[string]string{
-									"tenant": tenant,
+									tools.KUFAST_TENANT_LABEL: tenant,
 								},
 							},
 						},
@@ -217,6 +233,9 @@ func NewNetworkPolicy(namespaceName string, tenant string) *n1.NetworkPolicy {
 
 }
 
+// NewTenantRolebinding creates a new Kubernetes RoleBinding object based on several parameters.
+// This Role binding is preconfigured for the role binding of a tenant target role to a tenant.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewTenantRolebinding(namespaceName string, tenant string) *v12.RoleBinding {
 	return &v12.RoleBinding{
 		TypeMeta: metav1.TypeMeta{
@@ -242,6 +261,9 @@ func NewTenantRolebinding(namespaceName string, tenant string) *v12.RoleBinding 
 	}
 }
 
+// NewTenantDefaultRole creates a new Kubernetes RoleB object based on several parameters.
+// This Role is preconfigured as kufast tenant standard role.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewTenantDefaultRole(tenantName string) *v12.Role {
 	return &v12.Role{
 		TypeMeta: metav1.TypeMeta{
@@ -267,6 +289,9 @@ func NewTenantDefaultRole(tenantName string) *v12.Role {
 
 }
 
+// NewTenantDefaultRoleBinding creates a new Kubernetes RoleB object based on several parameters.
+// This Role binding is preconfigured for the role binding of the tenant default policy.
+// Created objects only exist locally and need to be deployed to the cluster.
 func NewTenantDefaultRoleBinding(tenantName string) *v12.RoleBinding {
 	return &v12.RoleBinding{
 		TypeMeta: metav1.TypeMeta{

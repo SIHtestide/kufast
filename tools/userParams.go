@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+// GetUserClient creates an instance of clientset to communicate with the Kubernetes cluster
+// based on the credentials the user entered when using this program.
 func GetUserClient(cmd *cobra.Command) (*kubernetes.Clientset, *rest.Config, error) {
 	var config *rest.Config
 	var clientset *kubernetes.Clientset
@@ -33,43 +35,35 @@ func GetUserClient(cmd *cobra.Command) (*kubernetes.Clientset, *rest.Config, err
 	return clientset, config, nil
 }
 
+// GetTenantFromNamespace returns the tenants name from one of its namespaces by leveraging
+// the namespace naming convention
 func GetTenantFromNamespace(namespaceName string) string {
 	return strings.Split(namespaceName, ("-"))[0]
 }
 
+// GetNamespaceFromUserConfig reads the userconfig of a user and returns the namespace
+// specified in it.
 func GetNamespaceFromUserConfig(cmd *cobra.Command) (string, error) {
-
-	all, _ := cmd.Flags().GetBool("all-namespaces")
-	if all {
-		return "", nil
-	}
 
 	path, err := getKubeconfigPath(cmd)
 	if err != nil {
 		return "", err
 	}
 
-	ns, err := cmd.Flags().GetString("namespace")
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	loadingRules.Precedence[0] = path
+	cfg, err := loadingRules.Load()
 	if err != nil {
 		return "", err
-	}
-	if ns == "" {
-		loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-		loadingRules.Precedence[0] = path
-		cfg, err := loadingRules.Load()
-		if err != nil {
-			return "", err
-		} else if cfg.Contexts[cfg.CurrentContext] != nil {
-			return cfg.Contexts[cfg.CurrentContext].Namespace, nil
-		}
-
+	} else if cfg.Contexts[cfg.CurrentContext] != nil {
+		return cfg.Contexts[cfg.CurrentContext].Namespace, nil
 	} else {
-		return ns, nil
+		return "", errors.New("Config not found or bad format.")
 	}
 
-	return "", errors.New("Config not found or bad format.")
 }
 
+// getKubeconfigPath returns the path of the kubeconfig stored in a cobra command.
 func getKubeconfigPath(cmd *cobra.Command) (string, error) {
 	var kubeLoc string
 

@@ -11,7 +11,7 @@ import (
 // deleteCmd represents the delete command
 var deletePodCmd = &cobra.Command{
 	Use:   "pod <pods>..",
-	Short: "Delete the selected pod including its storage.",
+	Short: "Delete the selected pod.",
 	Long:  `Delete the selected pod including its storage. Please use with care! Deleted data cannot be restored.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -48,7 +48,7 @@ var deletePodCmd = &cobra.Command{
 			}
 
 			s.Stop()
-			fmt.Println("Done!")
+			fmt.Println(tools.MESSAGE_DONE)
 
 		}
 

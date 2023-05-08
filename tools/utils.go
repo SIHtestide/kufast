@@ -1,3 +1,5 @@
+// Package tools contains useful helper functions to reduce complexity and increase
+// the maintainability of the code.
 package tools
 
 import (
@@ -16,35 +18,58 @@ import (
 	"time"
 )
 
+// KUFAST_TENANT_DEFAULT_LABEL returns the name of the label for the default deployment namespace for a tenant
 const KUFAST_TENANT_DEFAULT_LABEL = "kufast/default"
+
+// KUFAST_TENANT_GROUPACCESS_LABEL returns the static part of the group access label of a tenant
 const KUFAST_TENANT_GROUPACCESS_LABEL = "kufast.groupaccess/"
+
+// KUFAST_TENANT_NODEACCESS_LABEL returns the static part of the node access label of a tenant
 const KUFAST_TENANT_NODEACCESS_LABEL = "kufast.nodeaccess/"
+
+// KUFAST_NODE_HOSTNAME_LABEL returns the Kubernetes default hostname label of a node
 const KUFAST_NODE_HOSTNAME_LABEL = "kubernetes.io/hostname"
+
+// KUFAST_NODE_GROUP_LABEL returns the static part of a group label that can be attached to a node
 const KUFAST_NODE_GROUP_LABEL = "kufast.group/"
+
+// KUFAST_TENANT_LABEL returns the default label for a tenant object
 const KUFAST_TENANT_LABEL = "kufast/tenant"
 
+// HandleError prints the error message given to it, prints the cobra commands help and exits the program
 func HandleError(err error, cmd *cobra.Command) {
 	fmt.Println("\n\n" + err.Error() + "\n\n")
 	_ = cmd.Help()
 	os.Exit(1)
 }
 
+// HandleErrorWithoutHelp prints the error message given to it and exits the program
+func HandleErrorWithoutHelp(err error) {
+	fmt.Println("\n\n" + err.Error() + "\n\n")
+	os.Exit(1)
+}
+
+// GetDialogAnswer prints the given question to the user and expects and input to return
 func GetDialogAnswer(question string) string {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println(question)
-	fmt.Print(">>")
+	fmt.Print(">> ")
 	answer, _ := reader.ReadString('\n')
 	answer = strings.TrimSuffix(answer, "\n")
 	return answer
 }
 
+// GetPasswordAnswer prints the given question to the user and expects and input to return.
+// The input is not shown on the command line
 func GetPasswordAnswer(question string) string {
 	fmt.Println(question)
-	fmt.Print(">>")
+	fmt.Print(">> ")
 	password, _ := term.ReadPassword(int(syscall.Stdin))
 	return strings.TrimSpace(string(password))
 }
 
+// WriteNewUserYamlToFile writes the credentials of a tenant to file. If the tenant has no tenant-target yet,
+// the default namespace is set to the tenant-target user.
 func WriteNewUserYamlToFile(tenantName string, cmd *cobra.Command, s *spinner.Spinner) error {
 
 	clientset, clientConfig, err := GetUserClient(cmd)
@@ -86,8 +111,14 @@ func WriteNewUserYamlToFile(tenantName string, cmd *cobra.Command, s *spinner.Sp
 		},
 		CurrentContext: "default-context",
 	}
+
 	if tenant.ObjectMeta.Labels[KUFAST_TENANT_DEFAULT_LABEL] != "" {
 		newConfig.Contexts["default-context"].Namespace = tenantName + "-" + tenant.ObjectMeta.Labels[KUFAST_TENANT_DEFAULT_LABEL]
+	} else {
+		s.Stop()
+		fmt.Println("Warning: No tenant-target specified! Consider to regenerate the tenants credentials after you created one" +
+			" to avoid side effects!")
+		s.Start()
 	}
 
 	err = clientcmd.WriteToFile(newConfig, out+"/"+tenantName+".kubeconfig")

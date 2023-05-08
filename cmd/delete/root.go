@@ -12,7 +12,7 @@ var deleteCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help
+		_ = cmd.Help()
 	},
 }
 

@@ -38,6 +38,7 @@ var getPodCmd = &cobra.Command{
 		t.AppendRow(table.Row{"Name", pod.Name})
 		t.AppendRow(table.Row{"Namespace", pod.Namespace})
 		t.AppendRow(table.Row{"Status", pod.Status.Phase})
+		t.AppendRow(table.Row{"Deployed on", pod.Spec.NodeName})
 		t.AppendSeparator()
 		t.AppendRow(table.Row{"CPU-Limit", "Limit: " + string(cpuLim) +
 			"\nRequests: " + string(cpuReq)})
@@ -48,6 +49,7 @@ var getPodCmd = &cobra.Command{
 		t.AppendRow(table.Row{"Attached Storage", "None / to be implemented"})
 		t.AppendRow(table.Row{"Deployed Image", pod.Spec.Containers[0].Image})
 		t.AppendRow(table.Row{"Restart Policy", pod.Spec.RestartPolicy})
+		t.AppendRow(table.Row{"IP Address", pod.Status.PodIP})
 
 		s.Stop()
 		t.AppendSeparator()
