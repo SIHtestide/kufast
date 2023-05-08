@@ -6,13 +6,13 @@ Kufast allows you to build a fast multi tenant environment on your Kubernetes cl
 leveraging the default capabilities of Kubernetes. The tool is designed in a way that make it
 easy to use by abstracting Kubernetes options that are not essential if you just want to run a
 container with Kubernetes.
-## As a Cluster Admin
+### As a Cluster Admin
 - Create and manage tenants that are seperated from each other with own namespaces
 - Create and manage resource limitations for CPU, RAM and storage per node by leveraging the namespace system
 of Kubernetes.
 - Create and manage groups of nodes, as deployment target with fixed quotas for the whole group
 - Get information about your cluster and the tenants within it.
-## As a Tenant
+### As a Tenant
 - Create, manage and debug pods with one container up to your quota.
 - Manage secrets and deployment secrets
 - Get information about your deployments
@@ -20,12 +20,12 @@ of Kubernetes.
 # Installation
 To compile the application please install go on your computer (e.g. through your package manager.)
 
-## Build the Application
+### Build the Application
 Then build the application by running
 ```bash
 go build kufast
 ```
-## (Optional) Set the Application to your PATH
+### (Optional) Set the Application to your PATH
 Afterwards, you can set the binary to your PATH e.g. on Linux by running:
 ```bash
 mv kufast /usr/bin/
@@ -33,12 +33,12 @@ mv kufast /usr/bin/
 
 # Configuration
 Now that you installed kufast, you need to know about a few extra configurations.
-## Setup your credentials
+### Setup your credentials
 kufast communicates with your Kuberntes cluster through your .kubeconfig. You can either set 
 your .kubeconfig up et the default location `~/.kube/config` or you can
 specify your credentials with each command by passing the `-k` flag.
 
-## (Admin only) Enable PodNodeSelector Admission Plugin
+### (Admin only) Enable PodNodeSelector Admission Plugin
 If you intend to use the limitation feature of tenant-target (see concepts), you need to enable the 
 [admission controller "PodNodeSelector"](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector)
  in your Kubernetes. In a default k8s installation you can do that by modifing the Kubernetes API Server
@@ -47,7 +47,7 @@ Manifest as shown below:
 #add ,PodNodeSelector to the --enableadmission-plugin flag
 vim /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
-## (Admin only) Install a CNI
+### (Admin only) Install a CNI
 If you want to separate nodes with network policies, a [CNI](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/) needs to be installed
 to your Kubernetes Cluster. The plugin must be able to understand generic Kubernetes
 network polices. We tested this tool with [callico](https://docs.tigera.io/calico/latest/getting-started/kubernetes/).
