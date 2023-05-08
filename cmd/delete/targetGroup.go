@@ -8,9 +8,9 @@ import (
 	"kufast/tools"
 )
 
-// deleteCmd represents the delete command
+// deleteTargetGroupCmd represents the delete target-group command
 var deleteTargetGroupCmd = &cobra.Command{
-	Use:   "targetGroup <targetgroup>..",
+	Use:   "target-group <target-group>..",
 	Short: "Delete a user and his credentials.",
 	Long: `Delete a user and his credentials. This operation can only be executed by a cluster admin.
 Please use with care! Deleted data cannot be restored.`,
@@ -41,6 +41,7 @@ Please use with care! Deleted data cannot be restored.`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	deleteCmd.AddCommand(deleteTargetGroupCmd)
 

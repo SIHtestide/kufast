@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-// getCmd represents the get command
+// getTenantTargetCmd represents the tenant-target command
 var getTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <tenant-target>",
 	Short: "Get information about about a namespace",
@@ -87,6 +87,7 @@ var getTenantTargetCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	getCmd.AddCommand(getTenantTargetCmd)
 

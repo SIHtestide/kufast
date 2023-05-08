@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-// listCmd represents the list command
+// listPodsCmd represents the list pods command
 var listPodsCmd = &cobra.Command{
 	Use:   "pods",
 	Short: "List all pods in a namespace",
@@ -48,6 +48,7 @@ To gain further information see the kubectl get pod command.`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	listCmd.AddCommand(listPodsCmd)
 	listPodsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")

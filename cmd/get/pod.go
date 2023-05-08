@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-// getCmd represents the get command
+// getPodCmd represents the get pod command
 var getPodCmd = &cobra.Command{
 	Use:   "pod <pod>",
 	Short: "Gain information about a deployed pod.",
@@ -58,6 +58,7 @@ var getPodCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	getCmd.AddCommand(getPodCmd)
 

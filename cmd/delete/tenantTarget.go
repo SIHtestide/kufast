@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-// deleteCmd represents the delete command
+// deleteTenantTargetCmd represents the delete tenant-target command
 var deleteTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <tenant-target>",
 	Short: "Delete the namespace including all users and pods in it.",
@@ -93,10 +93,11 @@ Please use with care! Deleted data cannot be restored.`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	deleteCmd.AddCommand(deleteTenantTargetCmd)
 
-	deleteTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
+	deleteTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this tenant-target.")
 	_ = deleteTenantTargetCmd.MarkFlagRequired("tenant")
 
 }

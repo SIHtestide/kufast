@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-// listCmd represents the list command
+// listSecretsCmd represents the list secrets command
 var listSecretsCmd = &cobra.Command{
 	Use:   "secrets",
 	Short: "List all secrets in a namespace",
@@ -38,6 +38,7 @@ To gain further information see the kubectl get pod command.`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	listCmd.AddCommand(listSecretsCmd)
 

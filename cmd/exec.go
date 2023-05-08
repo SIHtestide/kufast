@@ -76,6 +76,7 @@ command line type "exit".`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	RootCmd.AddCommand(execCmd)
 
@@ -83,11 +84,5 @@ func init() {
 	execCmd.Flags().StringP("command", "c", "/bin/sh", "Set the command to be exec")
 	execCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
 	execCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// execCmd.PersistentFlags().String("foo", "", "A help for foo")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// execCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

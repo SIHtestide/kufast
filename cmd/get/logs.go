@@ -10,7 +10,7 @@ import (
 	"kufast/tools"
 )
 
-// getCmd represents the get command
+// getLogsCmd represents the get logs command
 var getLogsCmd = &cobra.Command{
 	Use:   "logs <podname>",
 	Short: "Get the logs of a pod",
@@ -64,6 +64,7 @@ var getLogsCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	getCmd.AddCommand(getLogsCmd)
 

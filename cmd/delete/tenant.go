@@ -8,7 +8,7 @@ import (
 	"kufast/tools"
 )
 
-// deleteCmd represents the delete command
+// deleteTenantCmd represents the delete tenant command
 var deleteTenantCmd = &cobra.Command{
 	Use:   "tenant <tenant>..",
 	Short: "Delete tenants, their namespaces and their credentials.",
@@ -72,6 +72,7 @@ Please use with care! Deleted data cannot be restored.`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	deleteCmd.AddCommand(deleteTenantCmd)
 

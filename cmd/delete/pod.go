@@ -8,7 +8,7 @@ import (
 	"kufast/tools"
 )
 
-// deleteCmd represents the delete command
+// deletePodCmd represents the delete pod command
 var deletePodCmd = &cobra.Command{
 	Use:   "pod <pods>..",
 	Short: "Delete the selected pod.",
@@ -55,6 +55,7 @@ var deletePodCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	deleteCmd.AddCommand(deletePodCmd)
 

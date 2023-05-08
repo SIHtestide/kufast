@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-// getCmd represents the get command
+// getSecretCmd represents the get secret command
 var getSecretCmd = &cobra.Command{
 	Use:   "secret <secret>",
 	Short: "Gain information about a deployed pod.",
@@ -47,6 +47,7 @@ var getSecretCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	getCmd.AddCommand(getSecretCmd)
 

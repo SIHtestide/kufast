@@ -8,7 +8,7 @@ import (
 	"kufast/tools"
 )
 
-// createCmd represents the create command
+// updateTargetGroupCmd represents the update target-group command
 var updateTargetGroupCmd = &cobra.Command{
 	Use:   "target-group <name> <nodes>",
 	Short: "Create a new environment secret in this namespace",
@@ -36,6 +36,7 @@ on the cluster.`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	updateCmd.AddCommand(updateTargetGroupCmd)
 

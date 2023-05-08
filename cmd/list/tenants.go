@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-// listCmd represents the list command
+// listTenantsCmd represents the list tenants command
 var listTenantsCmd = &cobra.Command{
 	Use:   "tenants",
 	Short: "List all users in a namespace",
@@ -54,6 +54,7 @@ the cluster. This command will fail, if you do not have admin rights on the clus
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	listCmd.AddCommand(listTenantsCmd)
 

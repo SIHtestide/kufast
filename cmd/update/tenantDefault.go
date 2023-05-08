@@ -8,7 +8,7 @@ import (
 	"kufast/tools"
 )
 
-// listCmd represents the list command
+// updateTenantDefaultCmd represents the update tenant-default command
 var updateTenantDefaultCmd = &cobra.Command{
 	Use:   "tenant-default <newDefault>",
 	Short: "Update a resource",
@@ -31,6 +31,7 @@ var updateTenantDefaultCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	updateCmd.AddCommand(updateTenantDefaultCmd)
 

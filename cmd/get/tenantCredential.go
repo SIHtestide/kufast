@@ -7,6 +7,7 @@ import (
 	"kufast/tools"
 )
 
+// getTenantCredsCmd represents the get tenant-creds command
 var getTenantCredsCmd = &cobra.Command{
 	Use:   "tenant-creds <tenant>",
 	Short: "Generate tenant credentials for specific tenant.",
@@ -31,6 +32,7 @@ var getTenantCredsCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	getCmd.AddCommand(getTenantCredsCmd)
 	getTenantCredsCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")

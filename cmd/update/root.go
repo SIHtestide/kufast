@@ -14,6 +14,7 @@ var updateCmd = &cobra.Command{
 Use these features to update tenants and more.`,
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	cmd.RootCmd.AddCommand(updateCmd)
 

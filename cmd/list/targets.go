@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-// listCmd represents the list command
+// listTargetsCmd represents the list targets command
 var listTargetsCmd = &cobra.Command{
 	Use:   "targets",
 	Short: "List all nodes in the cluster.",
@@ -37,6 +37,7 @@ var listTargetsCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	listCmd.AddCommand(listTargetsCmd)
 	listTargetsCmd.PersistentFlags().BoolP("all", "a", false, "List the users for all namespaces, instead for a specific one.")

@@ -8,7 +8,7 @@ import (
 	"kufast/tools"
 )
 
-// deleteCmd represents the delete command
+// deleteSecretCmd represents the delete secret command
 var deleteSecretCmd = &cobra.Command{
 	Use:   "secret <secret>..",
 	Short: "Delete a user and his credentials.",
@@ -17,7 +17,7 @@ Please use with care! Deleted data cannot be restored.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//Check that exactly one arg has been provided (the namespace)
 		if len(args) < 1 {
-			tools.HandleError(errors.New("Too few arguments provided."), cmd)
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
 		//Ensure user knows what he does
@@ -52,6 +52,7 @@ Please use with care! Deleted data cannot be restored.`,
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	deleteCmd.AddCommand(deleteSecretCmd)
 

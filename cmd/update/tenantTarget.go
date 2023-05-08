@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-// listCmd represents the list command
+// updateTenantTargetCmd represents the update tenant-target command
 var updateTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <tenant target>",
 	Short: "Update Memory and CPU capabilities. Updates the role scheme to the latest version.",
@@ -131,6 +131,7 @@ var updateTenantTargetCmd = &cobra.Command{
 	},
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	updateCmd.AddCommand(updateTenantTargetCmd)
 
