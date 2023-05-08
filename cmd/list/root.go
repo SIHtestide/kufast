@@ -6,11 +6,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
+// listCmd represents the list command. It cannot be executed itself but only its subcommands.
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long:  ``,
+	Short: "List kufast objects",
+	Long: `The list subcommand is a collection of all list operations available in kufast.
+Use these features to list tenants, pods and more.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
@@ -19,12 +20,4 @@ var listCmd = &cobra.Command{
 func init() {
 	cmd.RootCmd.AddCommand(listCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

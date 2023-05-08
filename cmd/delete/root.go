@@ -6,26 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the delete command
+// deleteCmd represents the delete root command. It cannot be executed itself but only its subcommands.
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "A brief description of your command",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
-	},
+	Short: "Delete kufast objects.",
+	Long: `The delete subcommand is a collection of all delete operations available in kufast.
+Use these features to delete tenants, pods and more.`,
 }
 
 func init() {
 	cmd.RootCmd.AddCommand(deleteCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deleteCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// deleteCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

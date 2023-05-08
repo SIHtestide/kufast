@@ -11,10 +11,9 @@ import (
 // createCmd represents the create command
 var createDeploySecretCmd = &cobra.Command{
 	Use:   "deploy-secret name",
-	Short: "Create a new environment secret in this namespace",
-	Long: `This command creates a new user and adds him to a namespace. You can select the namespace of the user.
-Upon completion, the command yields the users credentials. This command will fail, if you do not have admin rights 
-on the cluster.`,
+	Short: "Creates a deploy-secret in the specified target.",
+	Long: `This command created a deploy-secret on the specified target. Deploy-secrets are required to create
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {

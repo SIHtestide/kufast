@@ -9,11 +9,9 @@ import (
 // listCmd represents the list command
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update a resource",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
-	},
+	Short: "Update kufast objects",
+	Long: `The update subcommand is a collection of all update operations available in kufast.
+Use these features to update tenants and more.`,
 }
 
 func init() {
