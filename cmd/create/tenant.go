@@ -112,13 +112,13 @@ func createTenantInteractive() []string {
 func init() {
 	createCmd.AddCommand(createTenantCmd)
 
-	createTenantCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for this namespace")
-	createTenantCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
-	createTenantCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage in this namespace")
+	createTenantCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for the tenant-target(s)")
+	createTenantCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for the tenant-target(s)")
+	createTenantCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage for the tenant-target(s)")
 	createTenantCmd.Flags().StringP("storage-min", "", "1Gi", "Set the amount of storage, each pod must consume")
-	createTenantCmd.Flags().StringP("pods", "", "1", "Limit the Number of pods that can be created in this namespace")
+	createTenantCmd.Flags().StringP("pods", "", "1", "Limit the Number of pods that can be created for the tenant-target(s)")
 
-	createTenantCmd.Flags().StringArrayP("target", "", nil, "Deployment target for the namespace. Can be specified multiple times. Leave empty, for all targets")
+	createTenantCmd.Flags().StringArrayP("target", "", nil, "Deployment target for the tenant. Can be specified multiple times.")
 
 	//Allow User definition
 	createTenantCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials.")

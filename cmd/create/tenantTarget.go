@@ -109,14 +109,14 @@ func init() {
 	createCmd.AddCommand(createTenantTargetCmd)
 
 	//Set minimum values
-	createTenantTargetCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for this namespace")
-	createTenantTargetCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
-	createTenantTargetCmd.Flags().StringP("pods", "", "1", "Limit the Number of pods that can be created in this namespace")
-	createTenantTargetCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage in this namespace")
+	createTenantTargetCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for the tenant-target(s)")
+	createTenantTargetCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for the tenant-target(s)")
+	createTenantTargetCmd.Flags().StringP("pods", "", "1", "Limit the Number of pods that can be created for the tenant-target(s)")
+	createTenantTargetCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage for the tenant-target(s)")
 	createTenantTargetCmd.Flags().StringP("storage-min", "", "1Gi", "Set the amount of storage, each pod must consume")
 
 	//Tenant for the operation must be always specified
-	createTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
+	createTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant for the tenant-target(s).")
 	_ = createTenantTargetCmd.MarkFlagRequired("tenant")
 
 }
