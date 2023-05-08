@@ -1,3 +1,4 @@
+// Package create contains the cmd functions for the creation of objects in kufast
 package create
 
 import (
@@ -8,7 +9,7 @@ import (
 	"kufast/tools"
 )
 
-// createCmd represents the create command
+// createDeploySecretCmd represents the create deploy-secret command
 var createDeploySecretCmd = &cobra.Command{
 	Use:   "deploy-secret name",
 	Short: "Creates a deploy-secret in the specified target.",
@@ -41,6 +42,7 @@ from dockerconfig files. A prerequisite to this command is, to store this file o
 	},
 }
 
+// createDeploySecretInteractive is a helper function to create a deploy-secret interactively
 func createDeploySecretInteractive(cmd *cobra.Command) []string {
 	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
 	fmt.Println(`Please note, you need to specify the path to your dockercongigjson upfront.
@@ -53,12 +55,16 @@ func createDeploySecretInteractive(cmd *cobra.Command) []string {
 	return args
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	createCmd.AddCommand(createDeploySecretCmd)
 
-	createDeploySecretCmd.Flags().StringP("input", "", "", "Path to your .dockerconfigfile to read credentials from.")
-	createDeploySecretCmd.Flags().StringP("target", "", "", "The target for the deploysecret (Needs to be the same as the pod using it.")
+	//target and tenant for the operation can be specified
+	createDeploySecretCmd.Flags().StringP("target", "", "", "The tenant-target for the deploy-secret (Needs to be the same as the pod using it.")
 	createDeploySecretCmd.Flags().StringP("tenant", "", "", "The tenant for this operation")
+
+	//Input is required to get the secret
+	createDeploySecretCmd.Flags().StringP("input", "", "", "Path to your .dockerconfigfile to read credentials from.")
 	createDeploySecretCmd.MarkFlagRequired("input")
 	createDeploySecretCmd.MarkFlagFilename("input", "json")
 

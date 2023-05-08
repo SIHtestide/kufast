@@ -1,3 +1,4 @@
+// Package create contains the cmd functions for the creation of objects in kufast
 package create
 
 import (
@@ -8,16 +9,18 @@ import (
 	"kufast/tools"
 )
 
-// createCmd represents the create command
+// createTenantCmd represents the create tenant command
 var createTenantCmd = &cobra.Command{
 	Use:   "tenant <name>..",
-	Short: "Create one or more new namespaces for tenants",
-	Long: `This command creates a new namespace for a tenant. You can select the name and set limits to the namespace.
-Write multiple names to create multiple namespaces at once. This command will fail, if you do not have admin rights on the cluster.`,
+	Short: "Creates one or more new tenants",
+	Long: `Creates one or more new tenants.
+A tenant is a separated entity that can work on your Kubernetes cluster. Pass the credentials for the tenant to a
+partner that is supposed to work with your cluster. 
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		isInteractive, _ := cmd.Flags().GetBool("interactive")
 		if isInteractive {
-			args = createTenantInteractive(cmd, args)
+			args = createTenantInteractive()
 		}
 		if len(args) < 1 {
 			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
@@ -47,6 +50,13 @@ Write multiple names to create multiple namespaces at once. This command will fa
 
 			if targets != nil {
 				for _, targetName := range targets {
+					if !tools.IsAlphaNumeric(targetName) {
+						s.Stop()
+						fmt.Println(tools.CreateAlphaNumericError(targetName))
+						s.Start()
+						continue
+					}
+
 					err = clusterOperations.AddTargetToTenant(cmd, targetName, tenantName)
 					if err != nil {
 						s.Stop()
@@ -83,11 +93,22 @@ Write multiple names to create multiple namespaces at once. This command will fa
 	},
 }
 
-func createTenantInteractive(cmd *cobra.Command, args []string) []string {
+// createTenantInteractive is a helper function to create a tenant interactively
+func createTenantInteractive() []string {
 	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
+	var args []string
+	args = append(args, tools.GetDialogAnswer("Please specify the name of the tenant."))
+	for true {
+		next := tools.GetDialogAnswer("Do you want to add another tenant? (y/N)")
+		if next != "y" {
+			break
+		}
+		args = append(args, tools.GetDialogAnswer("Please specify the name of the tenant."))
+	}
 	return args
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	createCmd.AddCommand(createTenantCmd)
 
@@ -100,10 +121,8 @@ func init() {
 	createTenantCmd.Flags().StringArrayP("target", "", nil, "Deployment target for the namespace. Can be specified multiple times. Leave empty, for all targets")
 
 	//Allow User definition
-	createTenantCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
+	createTenantCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials.")
 	_ = createTenantCmd.MarkFlagDirname("output")
 	_ = createTenantCmd.MarkFlagRequired("output")
-
-	_ = createTenantCmd.MarkFlagRequired("tenant")
 
 }

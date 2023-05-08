@@ -1,3 +1,4 @@
+// Package create contains the cmd functions for the creation of objects in kufast
 package create
 
 import (
@@ -8,7 +9,7 @@ import (
 	"kufast/tools"
 )
 
-// createSecretCmd represents the create command
+// createSecretCmd represents the create secret command
 var createSecretCmd = &cobra.Command{
 	Use:   "secret name",
 	Short: "Create a new environment secret in this namespace",
@@ -18,7 +19,7 @@ on the cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		isInteractive, _ := cmd.Flags().GetBool("interactive")
 		if isInteractive {
-			args = createSecretInteractive(cmd, args)
+			args = createSecretInteractive(cmd)
 		}
 
 		if len(args) != 1 {
@@ -42,15 +43,22 @@ on the cluster.`,
 	},
 }
 
-func createSecretInteractive(cmd *cobra.Command, args []string) []string {
+// createSecretInteractive is a helper function to create a secret interactively
+func createSecretInteractive(cmd *cobra.Command) []string {
 	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
+	var args []string
+	args = append(args, tools.GetDialogAnswer("Please enter the name, the secret should have in the system."))
+
+	target := tools.GetDialogAnswer("Please select the tenant-target for your request. Leave empty for default. You can use 'kufast list tenant-targets' to get a list.")
+	_ = cmd.Flags().Set("target", target)
 	return args
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	createCmd.AddCommand(createSecretCmd)
 
-	createSecretCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
+	createSecretCmd.Flags().StringP("target", "", "", "The tenant-target for the secret (Needs to be the same as the pod using it.")
 	createSecretCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
 
 }

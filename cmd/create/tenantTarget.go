@@ -1,3 +1,4 @@
+// Package create contains the cmd functions for the creation of objects in kufast
 package create
 
 import (
@@ -8,17 +9,19 @@ import (
 	"kufast/tools"
 )
 
-// createCmd represents the create command
+// createTenantTargetCmd represents the create tenant-target command
 var createTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <target>..",
-	Short: "Create one or more tenant-targets for one tenant.",
-	Long: `This command creates a new namespace for a tenant. You can select the name and set limits to the namespace.
-Write multiple names to create multiple namespaces at once. This command will fail, if you do not have admin rights on the cluster.`,
+	Short: "Creates one or more new tenant-targets",
+	Long: `Creates one or more new tenant-targets.
+Tenant-targets will be attached to tenants and give them the ability to deploy pods to the target
+until the specified resource limit is reached. Write multiple targets to create multiple tenant-targets at once. 
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		isInteractive, _ := cmd.Flags().GetBool("interactive")
 		if isInteractive {
-			args = createTenantTargetInteractive(cmd, args)
+			args = createTenantTargetInteractive(cmd)
 		}
 
 		if len(args) < 1 {
@@ -37,6 +40,13 @@ Write multiple names to create multiple namespaces at once. This command will fa
 		var targetResults []string
 
 		for _, targetName := range args {
+			if !tools.IsAlphaNumeric(targetName) {
+				s.Stop()
+				fmt.Println(tools.CreateAlphaNumericError(tenantName))
+				s.Start()
+				continue
+			}
+
 			err = clusterOperations.AddTargetToTenant(cmd, targetName, tenantName)
 			if err != nil {
 				s.Stop()
@@ -67,39 +77,46 @@ Write multiple names to create multiple namespaces at once. This command will fa
 	},
 }
 
-func createTenantTargetInteractive(cmd *cobra.Command, args []string) []string {
+// createTenantTargetInteractive is a helper function to create a tenant-target interactively
+func createTenantTargetInteractive(cmd *cobra.Command) []string {
 	fmt.Println(tools.MESSAGE_INTERACTIVE_IGNORE_INPUT)
-	if len(args) == 0 {
-		for true {
-			namespaceName := tools.GetDialogAnswer("What should be the name for the new namespace?")
-			args = append(args, namespaceName)
-			continueNamespaces := tools.GetDialogAnswer("Do you want to add another namespace (yes/no)?")
-			if continueNamespaces != "yes" {
-				break
-			}
+	var args []string
+	for true {
+		namespaceName := tools.GetDialogAnswer("Please specify the target for the tenant-target.")
+		args = append(args, namespaceName)
+		continueNamespaces := tools.GetDialogAnswer("Do you want to add another target (y/N)?")
+		if continueNamespaces != "y" {
+			break
 		}
-		limitCpu := tools.GetDialogAnswer("Which CPU limit do you want to set for the namespace(es)? (e.g. 1, 500m)")
-		_ = cmd.Flags().Set("limit-cpu", limitCpu)
-		limitMemory := tools.GetDialogAnswer("Which Memory limit do you want to set for the namespace(es)? (e.g. 100Mi, 5Gi)")
-		_ = cmd.Flags().Set("limit-memory", limitMemory)
-
 	}
+
+	limitCpu := tools.GetDialogAnswer("Which CPU limit do you want to set for the tenant-target(s)? (e.g. 1, 500m)")
+	_ = cmd.Flags().Set("cpu", limitCpu)
+	limitMemory := tools.GetDialogAnswer("Which memory limit do you want to set for the tenant-target(s)? (e.g. 100Mi, 5Gi)")
+	_ = cmd.Flags().Set("memory", limitMemory)
+	limitStorage := tools.GetDialogAnswer("Which storage limit do you want to set for the tenant-target(s)? (e.g. 100Mi, 5Gi)")
+	_ = cmd.Flags().Set("storage", limitStorage)
+	limitMinStorage := tools.GetDialogAnswer("Which minimum storage limit do you want to set for the tenant-target(s)? (e.g. 100Mi, 5Gi)")
+	_ = cmd.Flags().Set("min-storage", limitMinStorage)
+	limitPods := tools.GetDialogAnswer("Which pod limit do you want to set for the tenant-target(s)? (e.g. 100Mi, 5Gi)")
+	_ = cmd.Flags().Set("pods", limitPods)
+
 	return args
 }
 
+// init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	createCmd.AddCommand(createTenantTargetCmd)
 
+	//Set minimum values
 	createTenantTargetCmd.Flags().StringP("memory", "", "1Gi", "Limit the RAM usage for this namespace")
 	createTenantTargetCmd.Flags().StringP("cpu", "", "500m", "Limit the CPU usage for this namespace")
 	createTenantTargetCmd.Flags().StringP("pods", "", "1", "Limit the Number of pods that can be created in this namespace")
-	createTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
 	createTenantTargetCmd.Flags().StringP("storage", "", "10Gi", "Limit the total storage in this namespace")
 	createTenantTargetCmd.Flags().StringP("storage-min", "", "1Gi", "Set the amount of storage, each pod must consume")
-	createTenantTargetCmd.Flags().StringArrayP("users", "u", []string{}, "Usernames to create along with the namespace")
-	createTenantTargetCmd.Flags().StringP("output", "o", ".", "Folder to store the created client credentials. Mandatory, when defining -u")
-	createTenantTargetCmd.MarkFlagsRequiredTogether("output", "users")
-	_ = createTenantTargetCmd.MarkFlagDirname("output")
+
+	//Tenant for the operation must be always specified
+	createTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
 	_ = createTenantTargetCmd.MarkFlagRequired("tenant")
 
 }
