@@ -25,12 +25,12 @@ func init() {
 
 func CreateListDocs() {
 
-	err := os.MkdirAll("./docs/list/", 0770)
+	err := os.MkdirAll("./wiki/list/", 0770)
 	if err != nil {
 		panic(err)
 	}
 
-	err = doc.GenMarkdownTree(listCmd, "./docs/list/")
+	err = doc.GenMarkdownTree(listCmd, "./wiki/list/")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -89,7 +89,7 @@ func init() {
 }
 
 func CreateExecDocs() {
-	out, err := os.Create("./docs/exec.md")
+	out, err := os.Create("./wiki/exec.md")
 	if err != nil {
 		return
 	}
