@@ -13,8 +13,8 @@ import (
 // listTenantTargetsCmd represents the list tenant-targets command
 var listTenantTargetsCmd = &cobra.Command{
 	Use:   "tenant-targets",
-	Short: "List all namespaces in the cluster.",
-	Long:  `List all nodes in the cluster. The overview contains information about the status of each node.`,
+	Short: "List all tenant-targets of a tenant.",
+	Long:  `List all tenant-targets of a tenant. The overview contains the limit information of each tenant target.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Initial config block
@@ -86,6 +86,6 @@ var listTenantTargetsCmd = &cobra.Command{
 // init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	listCmd.AddCommand(listTenantTargetsCmd)
-	listTenantTargetsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	listTenantTargetsCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 
 }

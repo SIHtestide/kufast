@@ -10,11 +10,10 @@ import (
 
 // updateTargetGroupCmd represents the update target-group command
 var updateTargetGroupCmd = &cobra.Command{
-	Use:   "target-group <name> <nodes>",
-	Short: "Create a new environment secret in this namespace",
-	Long: `This command creates a new user and adds him to a namespace. You can select the namespace of the user.
-Upon completion, the command yields the users credentials. This command will fail, if you do not have admin rights 
-on the cluster.`,
+	Use:   "target-group <name> <nodes>..",
+	Short: "Update the nodes on an existing target group.",
+	Long: `Update the nodes on an existing target group. Specify all nodes that should be in the group after the reassignment. 
+ Already existing pods on nodes will not be affected of this change.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) < 2 {

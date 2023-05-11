@@ -18,8 +18,9 @@ import (
 // updateTenantTargetCmd represents the update tenant-target command
 var updateTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <tenant target>",
-	Short: "Update Memory and CPU capabilities. Updates the role scheme to the latest version.",
-	Long:  "",
+	Short: "Update memory, CPU and storage capabilities of a tenant target.",
+	Long: "Update memory, CPU and storage capabilities of a tenant target. " +
+		"Also updates the role scheme to the latest version of kufast.",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		//Check that exactly one arg has been provided (the namespace)
@@ -34,7 +35,7 @@ var updateTenantTargetCmd = &cobra.Command{
 		}
 
 		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = "Creating Objects - Please wait!  "
+		s.Prefix = tools.MESSAGE_UPDATE_OBJECTS
 		s.Start()
 
 		tenantName, err := clusterOperations.GetTenantNameFromCmd(cmd)

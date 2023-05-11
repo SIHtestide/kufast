@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	"os"
 )
 
@@ -26,4 +27,26 @@ func Execute() {
 // init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	RootCmd.PersistentFlags().StringP("kubeconfig", "k", "", "Your kubeconfig to access the cluster. If not provided, we read it from $HOME/.kube/config")
+
+}
+
+func CreateRootDocs() {
+	os.MkdirAll("./docs", 0770)
+	out, err := os.Create("./docs/root.md")
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		err := out.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	err = doc.GenMarkdown(RootCmd, out)
+	if err != nil {
+		panic(err)
+	}
+
 }

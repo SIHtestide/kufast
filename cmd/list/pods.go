@@ -14,8 +14,8 @@ import (
 // listPodsCmd represents the list pods command
 var listPodsCmd = &cobra.Command{
 	Use:   "pods",
-	Short: "List all pods in a namespace",
-	Long: `List all pods in your namespace. The overview contains information about the status of your pod and its name
+	Short: "List all pods in a tenant-target",
+	Long: `List all pods in yourtenant-target. The overview contains information about the status of your pod and its name.
 To gain further information see the kubectl get pod command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 

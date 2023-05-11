@@ -34,7 +34,7 @@ Please use with care! Deleted data cannot be restored.`,
 
 			//Check that exactly one arg has been provided (the namespace)
 			if len(args) != 1 {
-				tools.HandleError(errors.New("Too few or too many arguments provided."), cmd)
+				tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 			}
 
 			tenantName, err := cmd.Flags().GetString("tenant")
@@ -44,7 +44,7 @@ Please use with care! Deleted data cannot be restored.`,
 
 			//Activate spinner
 			s := spinner.New(spinner.CharSets[9], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-			s.Prefix = "Deleting Objects - Please wait!  "
+			s.Prefix = tools.MESSAGE_DELETE_OBJECTS
 			s.Start()
 
 			user, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})

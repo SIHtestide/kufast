@@ -11,8 +11,8 @@ import (
 // updateTenantDefaultCmd represents the update tenant-default command
 var updateTenantDefaultCmd = &cobra.Command{
 	Use:   "tenant-default <newDefault>",
-	Short: "Update a resource",
-	Long:  ``,
+	Short: "Set a new default tenant-target for a tenant.",
+	Long:  `Set a new default tenant-target for a tenant. The target must be valid for this tenant.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 2 {

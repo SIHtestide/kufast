@@ -1,7 +1,10 @@
 package list
 
 import (
+	"github.com/spf13/cobra/doc"
 	"kufast/cmd"
+	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -18,4 +21,17 @@ Use these features to list tenants, pods and more.`,
 func init() {
 	cmd.RootCmd.AddCommand(listCmd)
 
+}
+
+func CreateListDocs() {
+
+	err := os.MkdirAll("./docs/list/", 0770)
+	if err != nil {
+		panic(err)
+	}
+
+	err = doc.GenMarkdownTree(listCmd, "./docs/list/")
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -96,3 +96,10 @@ a private image from the docker registry.
 While this tool is enforcing multi-tenancy on a high level within Kubernetes, you also want to make sure,
 that your Kubernetes Cluster is configured in a way that it supports multi-tenancy. More
 information about this topic can be found [here](https://github.com/kubernetes-sigs/multi-tenancy).
+#Development
+### Rebuild Docu
+To rebuild the docu, simply run 
+```bash
+./kufast gen-docu
+```
+from the kufast root directory.

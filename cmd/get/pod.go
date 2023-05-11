@@ -13,7 +13,8 @@ import (
 var getPodCmd = &cobra.Command{
 	Use:   "pod <pod>",
 	Short: "Gain information about a deployed pod.",
-	Long:  `Gain information about a deployed pod.`,
+	Long: `Gain information about a deployed pod. Output includes name, tenant-target, status, node, limits, image,
+restart policy and IP-address`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
@@ -36,7 +37,7 @@ var getPodCmd = &cobra.Command{
 		t.SetOutputMirror(os.Stdout)
 		t.AppendHeader(table.Row{"ATTRIBUTE", "VALUE"})
 		t.AppendRow(table.Row{"Name", pod.Name})
-		t.AppendRow(table.Row{"Namespace", pod.Namespace})
+		t.AppendRow(table.Row{"Tenant-Target", pod.Namespace})
 		t.AppendRow(table.Row{"Status", pod.Status.Phase})
 		t.AppendRow(table.Row{"Deployed on", pod.Spec.NodeName})
 		t.AppendSeparator()

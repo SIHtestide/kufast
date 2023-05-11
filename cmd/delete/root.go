@@ -1,7 +1,10 @@
 package delete
 
 import (
+	"github.com/spf13/cobra/doc"
 	"kufast/cmd"
+	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -18,4 +21,17 @@ Use these features to delete tenants, pods and more.`,
 func init() {
 	cmd.RootCmd.AddCommand(deleteCmd)
 
+}
+
+func CreateDeleteDocs() {
+
+	err := os.MkdirAll("./docs/delete/", 0770)
+	if err != nil {
+		panic(err)
+	}
+
+	err = doc.GenMarkdownTree(deleteCmd, "./docs/delete/")
+	if err != nil {
+		log.Fatal(err)
+	}
 }

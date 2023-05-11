@@ -12,8 +12,8 @@ import (
 // getDeploySecretCmd represents the get deploy-secret command
 var getDeploySecretCmd = &cobra.Command{
 	Use:   "deploy-secret <secret>",
-	Short: "Gain information about a deployed pod.",
-	Long:  `Gain information about a deployed pod.`,
+	Short: "Gain information about a deploy-secret.",
+	Long:  `Gain information about a deploy-secret. Output includes name, tenant-target and the secret data.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
@@ -28,7 +28,7 @@ var getDeploySecretCmd = &cobra.Command{
 		}
 
 		if secret.Data[".dockerconfigjson"] == nil {
-			err := errors.New("Error: This is not a deployment secret")
+			err := errors.New("Error: This is not a deploy-secret")
 			tools.HandleError(err, cmd)
 		}
 
@@ -50,6 +50,6 @@ var getDeploySecretCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getDeploySecretCmd)
 
-	getDeploySecretCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	getDeploySecretCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	getDeploySecretCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	getDeploySecretCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 }

@@ -1,7 +1,10 @@
 package update
 
 import (
+	"github.com/spf13/cobra/doc"
 	"kufast/cmd"
+	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -18,4 +21,17 @@ Use these features to update tenants and more.`,
 func init() {
 	cmd.RootCmd.AddCommand(updateCmd)
 
+}
+
+func CreateUpdateDocs() {
+
+	err := os.MkdirAll("./docs/update/", 0770)
+	if err != nil {
+		panic(err)
+	}
+
+	err = doc.GenMarkdownTree(updateCmd, "./docs/update/")
+	if err != nil {
+		log.Fatal(err)
+	}
 }

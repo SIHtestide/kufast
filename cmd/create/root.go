@@ -2,7 +2,10 @@ package create
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	"kufast/cmd"
+	"log"
+	"os"
 )
 
 // createCmd represents the create root command. It cannot be executed itself but only its subcommands.
@@ -19,4 +22,18 @@ func init() {
 
 	//Enables interactive mode for all commands in create.
 	createCmd.PersistentFlags().BoolP("interactive", "i", false, "Start interactive mode for the creation of this object.")
+
+}
+
+func CreateCreateDocs() {
+
+	err := os.MkdirAll("./docs/create/", 0770)
+	if err != nil {
+		panic(err)
+	}
+
+	err = doc.GenMarkdownTree(createCmd, "./docs/create/")
+	if err != nil {
+		log.Fatal(err)
+	}
 }

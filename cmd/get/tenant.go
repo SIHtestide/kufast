@@ -12,8 +12,8 @@ import (
 // getTenantCmd represents the get tenant command
 var getTenantCmd = &cobra.Command{
 	Use:   "tenant <tenant name>",
-	Short: "Gain information about a deployed pod.",
-	Long:  `Gain information about a deployed pod.`,
+	Short: "Gain information about a deployed tenant.",
+	Long:  `Gain information about a deployed tenant. Output includes name, node access and group access`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {

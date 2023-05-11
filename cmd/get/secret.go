@@ -12,8 +12,8 @@ import (
 // getSecretCmd represents the get secret command
 var getSecretCmd = &cobra.Command{
 	Use:   "secret <secret>",
-	Short: "Gain information about a deployed pod.",
-	Long:  `Gain information about a deployed pod.`,
+	Short: "Gain information about a secret.",
+	Long:  `Gain information about a secret. Output includes name, tenant-target and the secret data.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {

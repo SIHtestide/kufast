@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
@@ -14,8 +15,8 @@ import (
 // execCmd represents the exec command
 var execCmd = &cobra.Command{
 	Use:   "exec <pod>",
-	Short: "Exec into an existing container.",
-	Long: `Exec into an existing container. With exec, you can access the command line of your
+	Short: "Exec into an existing pod.",
+	Long: `Exec into an existing pod. With exec, you can access the command line of your
 container (provided one exists) and execute commands in the context of your container. This
 will start an interactive CLI Session. To leave the container and get back to your normal
 command line type "exit".`,
@@ -37,7 +38,7 @@ command line type "exit".`,
 
 		//Check that exactly one arg has been provided (the pod)
 		if len(args) != 1 {
-			tools.HandleError(errors.New("Too few or too many arguments provided."), cmd)
+			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
 		//Set the command
@@ -81,8 +82,28 @@ func init() {
 	RootCmd.AddCommand(execCmd)
 
 	// Here you will define your flags and configuration settings.
-	execCmd.Flags().StringP("command", "c", "/bin/sh", "Set the command to be exec")
-	execCmd.Flags().StringP("target", "", "", "The target for the secret (Needs to be the same as the pod using it.")
-	execCmd.Flags().StringP("tenant", "", "", "The tenant owning the secret")
+	execCmd.Flags().StringP("command", "c", "/bin/sh", "Set the command for this operation")
+	execCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	execCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
+
+}
+
+func CreateExecDocs() {
+	out, err := os.Create("./docs/exec.md")
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		err := out.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	err = doc.GenMarkdown(execCmd, out)
+	if err != nil {
+		panic(err)
+	}
 
 }

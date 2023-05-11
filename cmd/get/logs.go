@@ -14,7 +14,7 @@ import (
 var getLogsCmd = &cobra.Command{
 	Use:   "logs <podname>",
 	Short: "Get the logs of a pod",
-	Long:  `.`,
+	Long:  `Get the logs of a pod.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//Initial config block
 		namespaceName, err := clusterOperations.GetTenantTargetNameFromCmd(cmd)
@@ -68,7 +68,7 @@ var getLogsCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getLogsCmd)
 
-	getLogsCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	getLogsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	getLogsCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	getLogsCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 
 }

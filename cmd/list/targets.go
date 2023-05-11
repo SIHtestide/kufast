@@ -11,8 +11,8 @@ import (
 // listTargetsCmd represents the list targets command
 var listTargetsCmd = &cobra.Command{
 	Use:   "targets",
-	Short: "List all nodes in the cluster.",
-	Long:  `List all nodes in the cluster. The overview contains information about the status of each node.`,
+	Short: "List possible targets for the current tenant.",
+	Long:  `List possible targets for the current tenant. A target is a node or a group of nodes, a tenant can deploy to.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		all, err := cmd.Flags().GetBool("all")
@@ -40,7 +40,7 @@ var listTargetsCmd = &cobra.Command{
 // init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	listCmd.AddCommand(listTargetsCmd)
-	listTargetsCmd.PersistentFlags().BoolP("all", "a", false, "List the users for all namespaces, instead for a specific one.")
-	listTargetsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	listTargetsCmd.PersistentFlags().BoolP("all", "a", false, "List all tenant targets available on the instance. Admin use only!")
+	listTargetsCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 	listTargetsCmd.MarkFlagsMutuallyExclusive("all", "tenant")
 }

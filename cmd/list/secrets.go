@@ -11,8 +11,8 @@ import (
 // listSecretsCmd represents the list secrets command
 var listSecretsCmd = &cobra.Command{
 	Use:   "secrets",
-	Short: "List all secrets in a namespace",
-	Long: `List all secrets in your namespace. The overview contains information about the nameof the secret and its creation date
+	Short: "List all secrets in a tenant-target",
+	Long: `List all secrets in a tenant-target. The overview contains information about the nameof the secret and its creation date
 To gain further information see the kubectl get pod command.`,
 	Run: func(cmd *cobra.Command, args []string) {
 

@@ -1,7 +1,10 @@
 package get
 
 import (
+	"github.com/spf13/cobra/doc"
 	"kufast/cmd"
+	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -18,4 +21,16 @@ Use these features to get tenants, pods and more.`,
 func init() {
 	cmd.RootCmd.AddCommand(getCmd)
 
+}
+
+func CreateGetDocs() {
+	err := os.MkdirAll("./docs/get/", 0770)
+	if err != nil {
+		panic(err)
+	}
+
+	err = doc.GenMarkdownTree(getCmd, "./docs/get/")
+	if err != nil {
+		log.Fatal(err)
+	}
 }

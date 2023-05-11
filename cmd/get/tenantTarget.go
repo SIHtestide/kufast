@@ -14,8 +14,8 @@ import (
 // getTenantTargetCmd represents the tenant-target command
 var getTenantTargetCmd = &cobra.Command{
 	Use:   "tenant-target <tenant-target>",
-	Short: "Get information about about a namespace",
-	Long:  `Get information about about a namespace.`,
+	Short: "Gain information on a tenant target.",
+	Long:  `Gain information on a tenant target. Lists name, status, limits, their usage, and the number of included pods`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) != 1 {
@@ -47,11 +47,6 @@ var getTenantTargetCmd = &cobra.Command{
 			tools.HandleError(err, cmd)
 		}
 
-		users, err := clientset.CoreV1().ServiceAccounts(tenantTargetName).List(context.TODO(), metav1.ListOptions{})
-		if err != nil {
-			tools.HandleError(err, cmd)
-		}
-
 		pods, err := clientset.CoreV1().Pods(tenantTargetName).List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
 			tools.HandleError(err, cmd)
@@ -61,6 +56,8 @@ var getTenantTargetCmd = &cobra.Command{
 		cpuReq, _ := quota.Spec.Hard["requests.cpu"].MarshalJSON()
 		memLim, _ := quota.Spec.Hard["limits.memory"].MarshalJSON()
 		memReq, _ := quota.Spec.Hard["requests.memory"].MarshalJSON()
+		StorageLim, _ := quota.Spec.Hard["limits.ephemeral-storage"].MarshalJSON()
+		StorageReq, _ := quota.Spec.Hard["requests.ephemeral-storage"].MarshalJSON()
 
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
@@ -72,17 +69,18 @@ var getTenantTargetCmd = &cobra.Command{
 			"\nRequests: " + string(cpuReq)})
 		t.AppendRow(table.Row{"Memory-Limit", "Limit: " + string(memLim) +
 			"\nRequests: " + string(memReq)})
-		t.AppendRow(table.Row{"Storage-Limit", "to be implemented"})
+		t.AppendRow(table.Row{"Storage-Limit", "Limit: " + string(StorageLim) +
+			"\nRequests: " + string(StorageReq)})
 		t.AppendSeparator()
 		t.AppendRow(table.Row{"Used CPU", quota.Status.Used.Cpu()})
 		t.AppendRow(table.Row{"Used Memory", quota.Status.Used.Memory()})
+		t.AppendRow(table.Row{"Used Storage", quota.Status.Used.Storage()})
 		t.AppendRow(table.Row{"Available Storage", "to be implemented"})
 		t.AppendSeparator()
-		t.AppendRow(table.Row{"# Users", len(users.Items)})
 		t.AppendRow(table.Row{"# Pods", len(pods.Items)})
+		t.AppendSeparator()
 
 		s.Stop()
-		t.AppendSeparator()
 		t.Render()
 	},
 }
