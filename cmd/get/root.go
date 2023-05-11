@@ -24,12 +24,12 @@ func init() {
 }
 
 func CreateGetDocs() {
-	err := os.MkdirAll("./wiki/get/", 0770)
+	err := os.MkdirAll("./kufast.wiki/get/", 0770)
 	if err != nil {
 		panic(err)
 	}
 
-	err = doc.GenMarkdownTree(getCmd, "./wiki/get/")
+	err = doc.GenMarkdownTree(getCmd, "./kufast.wiki/get/")
 	if err != nil {
 		log.Fatal(err)
 	}

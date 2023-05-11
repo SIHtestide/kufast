@@ -31,8 +31,8 @@ func init() {
 }
 
 func CreateRootDocs() {
-	os.MkdirAll("./wiki", 0770)
-	out, err := os.Create("./docs/root.md")
+	os.MkdirAll("./kufast.wiki", 0770)
+	out, err := os.Create("./kufast.wiki/root.md")
 	if err != nil {
 		return
 	}

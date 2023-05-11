@@ -25,12 +25,12 @@ func init() {
 
 func CreateDeleteDocs() {
 
-	err := os.MkdirAll("./wiki/delete/", 0770)
+	err := os.MkdirAll("./kufast.wiki/delete/", 0770)
 	if err != nil {
 		panic(err)
 	}
 
-	err = doc.GenMarkdownTree(deleteCmd, "./wiki/delete/")
+	err = doc.GenMarkdownTree(deleteCmd, "./kufast.wiki/delete/")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -5,6 +5,9 @@
 *.so
 *.dylib
 
+wiki
+kufast.wiki
+
 # Test binary, built with `go test -c`
 *.test
 
