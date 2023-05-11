@@ -23,13 +23,13 @@ func init() {
 
 }
 
-func CreateGetDocs() {
+func CreateGetDocs(fileP func(string) string, linkH func(string) string) {
 	err := os.MkdirAll("./kufast.wiki/get/", 0770)
 	if err != nil {
 		panic(err)
 	}
 
-	err = doc.GenMarkdownTree(getCmd, "./kufast.wiki/get/")
+	err = doc.GenMarkdownTreeCustom(getCmd, "./kufast.wiki/get/", fileP, linkH)
 	if err != nil {
 		log.Fatal(err)
 	}

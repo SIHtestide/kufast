@@ -6,6 +6,8 @@ package main
 import (
 	"kufast/cmd"
 	"os"
+	"path"
+	"strings"
 )
 import c "kufast/cmd/create"
 import d "kufast/cmd/delete"
@@ -22,11 +24,24 @@ func main() {
 }
 
 func generateMdDocs() {
-	cmd.CreateRootDocs()
-	cmd.CreateExecDocs()
-	c.CreateCreateDocs()
-	d.CreateDeleteDocs()
-	g.CreateGetDocs()
-	l.CreateListDocs()
-	u.CreateUpdateDocs()
+	filePrepander := func(filename string) string {
+		return filename
+	}
+
+	linkHandler := func(name string) string {
+		base := strings.TrimSuffix(name, path.Ext(name))
+		//Fix Home docu endpoint
+		if base == "kufast" {
+			base = "Home"
+		}
+		return strings.ToLower(base)
+	}
+
+	cmd.CreateRootDocs(linkHandler)
+	cmd.CreateExecDocs(linkHandler)
+	c.CreateCreateDocs(filePrepander, linkHandler)
+	d.CreateDeleteDocs(filePrepander, linkHandler)
+	g.CreateGetDocs(filePrepander, linkHandler)
+	l.CreateListDocs(filePrepander, linkHandler)
+	u.CreateUpdateDocs(filePrepander, linkHandler)
 }

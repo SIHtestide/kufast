@@ -88,7 +88,7 @@ func init() {
 
 }
 
-func CreateExecDocs() {
+func CreateExecDocs(linkH func(string) string) {
 	out, err := os.Create("./kufast.wiki/exec.md")
 	if err != nil {
 		return
@@ -101,7 +101,7 @@ func CreateExecDocs() {
 		}
 	}()
 
-	err = doc.GenMarkdown(execCmd, out)
+	err = doc.GenMarkdownCustom(execCmd, out, linkH)
 	if err != nil {
 		panic(err)
 	}

@@ -30,9 +30,9 @@ func init() {
 
 }
 
-func CreateRootDocs() {
+func CreateRootDocs(linkH func(string) string) {
 	os.MkdirAll("./kufast.wiki", 0770)
-	out, err := os.Create("./kufast.wiki/root.md")
+	out, err := os.Create("./kufast.wiki/Home.md")
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func CreateRootDocs() {
 		}
 	}()
 
-	err = doc.GenMarkdown(RootCmd, out)
+	err = doc.GenMarkdownCustom(RootCmd, out, linkH)
 	if err != nil {
 		panic(err)
 	}
