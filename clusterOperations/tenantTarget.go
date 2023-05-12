@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// CreateTenantTarget creates a new tenant-target
 func CreateTenantTarget(tenantName string, targetName string, cmd *cobra.Command) <-chan string {
 	res := make(chan string)
 
@@ -90,6 +91,7 @@ func CreateTenantTarget(tenantName string, targetName string, cmd *cobra.Command
 
 }
 
+// DeleteTenantTarget deletes a tenant-target
 func DeleteTenantTarget(targetName string, tenantName string, cmd *cobra.Command) <-chan string {
 	res := make(chan string)
 
@@ -116,6 +118,7 @@ func DeleteTenantTarget(targetName string, tenantName string, cmd *cobra.Command
 
 }
 
+// GetTenantTarget gets a tenant-target
 func GetTenantTarget(tenantName string, targetName string, cmd *cobra.Command) (*v1.Namespace, error) {
 
 	//Configblock
@@ -132,6 +135,7 @@ func GetTenantTarget(tenantName string, targetName string, cmd *cobra.Command) (
 
 }
 
+// ListTenantTarget lists a new tenant-target
 func ListTenantTargets(tenantName string, cmd *cobra.Command) ([]*v1.Namespace, error) {
 
 	tenantTargets, err := ListTargetsFromString(cmd, tenantName, false)
@@ -153,6 +157,7 @@ func ListTenantTargets(tenantName string, cmd *cobra.Command) ([]*v1.Namespace, 
 
 }
 
+// GetTenantTargetNameFromCmd gets the tenant targets name from the command.
 func GetTenantTargetNameFromCmd(cmd *cobra.Command) (string, error) {
 
 	namespaceName, err := tools.GetNamespaceFromUserConfig(cmd)

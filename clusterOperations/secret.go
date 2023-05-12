@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// CreateDeploymentSecret creates a new deploy-secret. All parameters are drawn from the cobra command.
 func CreateDeploymentSecret(secretName string, cmd *cobra.Command) error {
 
 	clientset, _, err := tools.GetUserClient(cmd)
@@ -43,6 +44,7 @@ func CreateDeploymentSecret(secretName string, cmd *cobra.Command) error {
 	return nil
 }
 
+// CreateSecret creates a new secret. All parameters are drawn from the cobra command.
 func CreateSecret(secretName string, secretData string, cmd *cobra.Command) error {
 	//Default config block
 	clientset, _, err := tools.GetUserClient(cmd)
@@ -67,6 +69,7 @@ func CreateSecret(secretName string, secretData string, cmd *cobra.Command) erro
 	return nil
 }
 
+// GetSecret gets an existing secret. All parameters are drawn from the cobra command.
 func GetSecret(secretName string, cmd *cobra.Command) (*v1.Secret, error) {
 	//Initial config block
 	namespaceName, err := GetTenantTargetNameFromCmd(cmd)
@@ -88,6 +91,7 @@ func GetSecret(secretName string, cmd *cobra.Command) (*v1.Secret, error) {
 	return secret, nil
 }
 
+// ListSecrets lists all secrets of a tenant. All parameters are drawn from the cobra command.
 func ListSecrets(cmd *cobra.Command) ([]v1.Secret, error) {
 	clientset, _, err := tools.GetUserClient(cmd)
 	if err != nil {
@@ -117,6 +121,7 @@ func ListSecrets(cmd *cobra.Command) ([]v1.Secret, error) {
 
 }
 
+// DeleteSecret deletes a secret of a tenant. All parameters are drawn from the cobra command.
 func DeleteSecret(secretName string, cmd *cobra.Command) <-chan string {
 	r := make(chan string)
 

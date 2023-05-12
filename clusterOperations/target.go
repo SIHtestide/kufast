@@ -3,7 +3,6 @@ package clusterOperations
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/strings/slices"
@@ -11,6 +10,8 @@ import (
 	"strings"
 )
 
+// IsValidTarget returns true, if the target is valid for this tenant. If all is true, the function returns if this
+// is a valid target within the cluster.
 func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 	if strings.Contains(target, "_") {
 		return false
@@ -27,6 +28,8 @@ func IsValidTarget(cmd *cobra.Command, target string, all bool) bool {
 	return false
 }
 
+// IsValidTenantTarget returns true, if the target is valid for this tenant. If all is true, the function returns if this
+// is a valid target within the cluster. reads the tenant name from a string.
 func IsValidTenantTarget(cmd *cobra.Command, target string, tenantName string, all bool) bool {
 
 	targets, err := ListTargetsFromString(cmd, tenantName, all)
@@ -41,6 +44,7 @@ func IsValidTenantTarget(cmd *cobra.Command, target string, tenantName string, a
 	return false
 }
 
+// GetTargetFromTargetName returns the target to a specific tragetName.
 func GetTargetFromTargetName(cmd *cobra.Command, targetName string, tenantName string, all bool) (tools.Target, error) {
 	targets, err := ListTargetsFromString(cmd, tenantName, all)
 	if err != nil {
@@ -54,6 +58,8 @@ func GetTargetFromTargetName(cmd *cobra.Command, targetName string, tenantName s
 	return tools.Target{}, errors.New("the target does not exist or the tenant has no access to the target")
 }
 
+// ListTargetsFromString returns a list of targets for a tenant. If all is true, it returns a list of all targets of the
+// cluster.
 func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]tools.Target, error) {
 
 	clientset, _, err := tools.GetUserClient(cmd)
@@ -117,12 +123,12 @@ func ListTargetsFromString(cmd *cobra.Command, tenantName string, all bool) ([]t
 
 }
 
+// ListTargetsFromCmd returns a list of targets for a tenant. If all is true, it returns a list of all targets of the
+// cluster.
 func ListTargetsFromCmd(cmd *cobra.Command, all bool) ([]tools.Target, error) {
 
 	//Get the information from the tenant
 	namespaceName, _ := tools.GetNamespaceFromUserConfig(cmd)
-	fmt.Println(namespaceName)
-	fmt.Println("namespaceName")
 	tenant, _ := cmd.Flags().GetString("tenant")
 	if tenant == "" {
 		tenant = tools.GetTenantFromNamespace(namespaceName)
@@ -132,6 +138,7 @@ func ListTargetsFromCmd(cmd *cobra.Command, all bool) ([]tools.Target, error) {
 
 }
 
+// SetTargetGroupToNodes Adds all nodes from the array to a target-group. Overwrites previous config.
 func SetTargetGroupToNodes(targetName string, targetNodes []string, cmd *cobra.Command) error {
 	clientset, _, err := tools.GetUserClient(cmd)
 	if err != nil {
@@ -160,6 +167,7 @@ func SetTargetGroupToNodes(targetName string, targetNodes []string, cmd *cobra.C
 	return nil
 }
 
+// DeleteTargetGroupFromNodes removes a target-group from all nodes.
 func DeleteTargetGroupFromNodes(targetName string, cmd *cobra.Command) error {
 	clientset, _, err := tools.GetUserClient(cmd)
 	if err != nil {

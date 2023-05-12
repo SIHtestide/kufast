@@ -10,6 +10,7 @@ import (
 	"kufast/tools"
 )
 
+// CreateTenant creates a new tenant. All parameters are drawn from the environment on the command line.
 func CreateTenant(tenantName string, cmd *cobra.Command) error {
 
 	//Configblock
@@ -36,6 +37,7 @@ func CreateTenant(tenantName string, cmd *cobra.Command) error {
 	return nil
 }
 
+// DeleteTenant Deletes a tenant. All parameters are drawn from the environment on the command line.
 func DeleteTenant(tenantName string, cmd *cobra.Command) error {
 	//Configblock
 	clientset, _, err := tools.GetUserClient(cmd)
@@ -61,6 +63,7 @@ func DeleteTenant(tenantName string, cmd *cobra.Command) error {
 	return nil
 }
 
+// GetTenantNameFromCmd gets the name of a tenant from cmd. All parameters are drawn from the environment on the command line.
 func GetTenantNameFromCmd(cmd *cobra.Command) (string, error) {
 	tenant, _ := cmd.Flags().GetString("tenant")
 	if tenant == "" {
@@ -73,6 +76,7 @@ func GetTenantNameFromCmd(cmd *cobra.Command) (string, error) {
 	return tenant, nil
 }
 
+// GetTenantFromCmd gets a tenant object. All parameters are drawn from the environment on the command line.
 func GetTenantFromCmd(cmd *cobra.Command) (*v1.ServiceAccount, error) {
 
 	tenantName, err := GetTenantNameFromCmd(cmd)
@@ -94,6 +98,7 @@ func GetTenantFromCmd(cmd *cobra.Command) (*v1.ServiceAccount, error) {
 	return user, nil
 }
 
+// GetTenantFromString gets a tenant object from its name. All parameters are drawn from the environment on the command line.
 func GetTenantFromString(cmd *cobra.Command, tenantName string) (*v1.ServiceAccount, error) {
 
 	//Configblock
@@ -110,6 +115,7 @@ func GetTenantFromString(cmd *cobra.Command, tenantName string) (*v1.ServiceAcco
 	return user, nil
 }
 
+// UpdateTenantDefaultDeployTarget sets the kufast/default label of a tenant to a new value.
 func UpdateTenantDefaultDeployTarget(newDefaultTarget string, cmd *cobra.Command) error {
 	//Configblock
 	clientset, _, err := tools.GetUserClient(cmd)
@@ -132,6 +138,7 @@ func UpdateTenantDefaultDeployTarget(newDefaultTarget string, cmd *cobra.Command
 
 }
 
+// DeleteTargetFromTenant deletes a target from a tenant.
 func DeleteTargetFromTenant(targetName string, tenantName string, cmd *cobra.Command) error {
 	if IsValidTenantTarget(cmd, targetName, tenantName, false) {
 		clientset, _, err := tools.GetUserClient(cmd)
@@ -166,6 +173,7 @@ func DeleteTargetFromTenant(targetName string, tenantName string, cmd *cobra.Com
 	return nil
 }
 
+// AddTargetToTenant adds a new target to a tenant.
 func AddTargetToTenant(cmd *cobra.Command, targetName string, tenantName string) error {
 	if IsValidTenantTarget(cmd, targetName, tenantName, true) {
 		clientset, _, err := tools.GetUserClient(cmd)
@@ -202,6 +210,7 @@ func AddTargetToTenant(cmd *cobra.Command, targetName string, tenantName string)
 	return errors.New("Invalid target!")
 }
 
+// GetTenantDefaultTargetNameFromCmd returns the default target name of a tenant from cmd parameters.
 func GetTenantDefaultTargetNameFromCmd(cmd *cobra.Command) (string, error) {
 
 	user, err := GetTenantFromCmd(cmd)

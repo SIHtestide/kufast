@@ -161,6 +161,7 @@ func GetPodEvents(podName string, cmd *cobra.Command) ([]v1.Event, error) {
 	return events.Items, nil
 }
 
+// ListTenantPods lists all pods in all tenant-targets of a tenant.
 func ListTenantPods(cmd *cobra.Command) ([]v1.Pod, error) {
 
 	clientset, _, err := tools.GetUserClient(cmd)
