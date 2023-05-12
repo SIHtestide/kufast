@@ -69,6 +69,7 @@ var updateTenantTargetCmd = &cobra.Command{
 
 		ram, _ := cmd.Flags().GetString("memory")
 		cpu, _ := cmd.Flags().GetString("cpu")
+		storage, _ := cmd.Flags().GetString("storage")
 		target, _ := cmd.Flags().GetString("target")
 
 		if namespace.ObjectMeta.Annotations == nil {
@@ -90,6 +91,14 @@ var updateTenantTargetCmd = &cobra.Command{
 			if err == nil {
 				quota.Spec.Hard["limits.cpu"] = qty
 				quota.Spec.Hard["requests.cpu"] = qty
+			}
+		}
+
+		if storage != "" {
+			qty, err := resource.ParseQuantity(storage)
+			if err == nil {
+				quota.Spec.Hard["limits.ephemeral-storage"] = qty
+				quota.Spec.Hard["requests.ephemeral-storage"] = qty
 			}
 		}
 
@@ -136,9 +145,10 @@ var updateTenantTargetCmd = &cobra.Command{
 func init() {
 	updateCmd.AddCommand(updateTenantTargetCmd)
 
-	updateTenantTargetCmd.Flags().StringP("memory", "", "4Gi", "Limit the RAM usage for this namespace")
-	updateTenantTargetCmd.Flags().StringP("cpu", "", "2", "Limit the CPU usage for this namespace")
-	updateTenantTargetCmd.Flags().StringP("tenant", "t", "", "The tenant owning this namespace. Matching tenants will be connected.")
+	updateTenantTargetCmd.Flags().StringP("memory", "", "", "Limit the RAM usage for this namespace")
+	updateTenantTargetCmd.Flags().StringP("cpu", "", "", "Limit the CPU usage for this namespace")
+	updateTenantTargetCmd.Flags().StringP("storage", "", "", "Limit the storage usage for this namespace")
+	updateTenantTargetCmd.Flags().StringP("tenant", "t", "", tools.DOCU_FLAG_TENANT)
 	_ = updateTenantTargetCmd.MarkFlagRequired("tenant")
 
 }

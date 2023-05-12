@@ -170,12 +170,7 @@ func NewRole(namespaceName string) *v12.Role {
 			{
 				APIGroups: []string{""},
 				Verbs:     []string{"get", "list", "watch", "update", "delete", "create"},
-				Resources: []string{"pods", "secrets", "pods/exec"},
-			},
-			{
-				APIGroups: []string{""},
-				Verbs:     []string{"get, list"},
-				Resources: []string{"pods/log", "events"},
+				Resources: []string{"pods", "secrets", "pods/exec", "events", "pods/log"},
 			},
 		},
 	}

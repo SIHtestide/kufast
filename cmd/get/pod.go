@@ -2,6 +2,7 @@ package get
 
 import (
 	"errors"
+	"fmt"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 	"kufast/clusterOperations"
@@ -28,10 +29,17 @@ restart policy and IP-address`,
 			tools.HandleError(err, cmd)
 		}
 
+		podEvents, err := clusterOperations.GetPodEvents(args[0], cmd)
+		if err != nil {
+			tools.HandleError(err, cmd)
+		}
+
 		cpuLim, _ := pod.Spec.Containers[0].Resources.Limits["cpu"].MarshalJSON()
 		cpuReq, _ := pod.Spec.Containers[0].Resources.Requests["cpu"].MarshalJSON()
 		memLim, _ := pod.Spec.Containers[0].Resources.Limits["memory"].MarshalJSON()
 		memReq, _ := pod.Spec.Containers[0].Resources.Requests["memory"].MarshalJSON()
+		storageLim, _ := pod.Spec.Containers[0].Resources.Limits["ephemeral-storage"].MarshalJSON()
+		storageReq, _ := pod.Spec.Containers[0].Resources.Requests["ephemeral-storage"].MarshalJSON()
 
 		t := table.NewWriter()
 		t.SetOutputMirror(os.Stdout)
@@ -47,14 +55,24 @@ restart policy and IP-address`,
 		t.AppendRow(table.Row{"Memory-Limit", "Limit: " + string(memLim) +
 			"\nRequests: " + string(memReq)})
 		t.AppendSeparator()
-		t.AppendRow(table.Row{"Attached Storage", "None / to be implemented"})
+		t.AppendRow(table.Row{"Storage-Limit", "Limit: " + string(storageLim) +
+			"\nRequests: " + string(storageReq)})
+		t.AppendSeparator()
+		t.AppendRow(table.Row{"Attached Storage"})
 		t.AppendRow(table.Row{"Deployed Image", pod.Spec.Containers[0].Image})
 		t.AppendRow(table.Row{"Restart Policy", pod.Spec.RestartPolicy})
 		t.AppendRow(table.Row{"IP Address", pod.Status.PodIP})
 
-		s.Stop()
 		t.AppendSeparator()
+		s.Stop()
 		t.Render()
+
+		fmt.Println("\n" + "Event Messages:")
+		for _, podEvent := range podEvents {
+			fmt.Println("\n" + podEvent.CreationTimestamp.String() + ":")
+			fmt.Println(podEvent.Message)
+			fmt.Println("Reason " + podEvent.Reason)
+		}
 
 	},
 }
@@ -63,6 +81,6 @@ restart policy and IP-address`,
 func init() {
 	getCmd.AddCommand(getPodCmd)
 
-	getPodCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	getPodCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	getPodCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	getPodCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 }

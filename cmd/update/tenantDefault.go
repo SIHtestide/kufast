@@ -35,7 +35,7 @@ var updateTenantDefaultCmd = &cobra.Command{
 func init() {
 	updateCmd.AddCommand(updateTenantDefaultCmd)
 
-	updateTenantDefaultCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	updateTenantDefaultCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 	_ = updateTenantDefaultCmd.MarkFlagRequired("tenant")
 
 }

@@ -51,6 +51,6 @@ var getSecretCmd = &cobra.Command{
 func init() {
 	getCmd.AddCommand(getSecretCmd)
 
-	getSecretCmd.Flags().StringP("target", "", "", "The name of the node to deploy the pod")
-	getSecretCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	getSecretCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	getSecretCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 }

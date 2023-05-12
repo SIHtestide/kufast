@@ -51,5 +51,5 @@ To gain further information see the kubectl get pod command.`,
 // init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
 	listCmd.AddCommand(listPodsCmd)
-	listPodsCmd.Flags().StringP("tenant", "", "", "The name of the tenant to deploy the pod to")
+	listPodsCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 }

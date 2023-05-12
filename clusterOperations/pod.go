@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+// CreatePod creates a new pod as an async function. The input channel is closed, as soon as the operation
+// completes. All parameters are drawn from the environment on the command line.
 func CreatePod(cmd *cobra.Command, args []string) <-chan string {
 	res := make(chan string)
 
@@ -44,7 +46,14 @@ func CreatePod(cmd *cobra.Command, args []string) <-chan string {
 				return
 			}
 
+			timeout := 30
 			for true {
+				timeout--
+
+				if timeout == 0 {
+					res <- "Operation timeout. Maybe your pod doesn't start correctly? Please look after it with 'kufast get pod'"
+				}
+
 				time.Sleep(time.Millisecond * 1000)
 				pod, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), args[0], metav1.GetOptions{})
 				if err != nil {
@@ -64,6 +73,8 @@ func CreatePod(cmd *cobra.Command, args []string) <-chan string {
 	return res
 }
 
+// DeletePod deletes an existent pod as an async function. The input channel is closed, as soon as the operation
+// completes. All parameters are drawn from the environment on the command line.
 func DeletePod(cmd *cobra.Command, pod string) <-chan string {
 	res := make(chan string)
 
@@ -88,7 +99,13 @@ func DeletePod(cmd *cobra.Command, pod string) <-chan string {
 		}
 
 		//Check for the pod been deleted from the system
+		timeout := 80
 		for true {
+			timeout--
+
+			if timeout == 0 {
+				res <- "Operation timeout. Your pod still exists. Please look after it with 'kufast get pod'"
+			}
 			time.Sleep(time.Millisecond * 250)
 			_, err := clientset.CoreV1().Pods(namespaceName).Get(context.TODO(), pod, metav1.GetOptions{})
 			if err != nil {
@@ -102,6 +119,7 @@ func DeletePod(cmd *cobra.Command, pod string) <-chan string {
 	return res
 }
 
+// GetPod returns a pod from a string. All parameters are drawn from the environment on the command line.
 func GetPod(podName string, cmd *cobra.Command) (*v1.Pod, error) {
 	//Initial config block
 	namespaceName, err := GetTenantTargetNameFromCmd(cmd)
@@ -121,6 +139,26 @@ func GetPod(podName string, cmd *cobra.Command) (*v1.Pod, error) {
 	}
 
 	return pod, nil
+}
+
+// GetPodEvents returns all pod events from the pod provided as a string.
+// All parameters are drawn from the environment on the command line.
+func GetPodEvents(podName string, cmd *cobra.Command) ([]v1.Event, error) {
+	//Initial config block
+	namespaceName, err := GetTenantTargetNameFromCmd(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	clientset, _, err := tools.GetUserClient(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	events, _ := clientset.CoreV1().Events(namespaceName).List(context.TODO(),
+		metav1.ListOptions{FieldSelector: "involvedObject.name=" + podName, TypeMeta: metav1.TypeMeta{Kind: "Pod"}})
+
+	return events.Items, nil
 }
 
 func ListTenantPods(cmd *cobra.Command) ([]v1.Pod, error) {
