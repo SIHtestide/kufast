@@ -104,10 +104,10 @@ var updateTenantTargetCmd = &cobra.Command{
 
 		if len(nps.Items) == 0 {
 			//Keine Policy, erstelle Policy
-			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Create(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenantName), metav1.CreateOptions{})
+			_, _ = clientset.NetworkingV1().NetworkPolicies(tenantTargetName).Create(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenantName), metav1.CreateOptions{})
 		} else if len(nps.Items) == 1 {
 			//Update Policy
-			_, _ = clientset.NetworkingV1().NetworkPolicies(args[0]).Update(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenantName), metav1.UpdateOptions{})
+			_, _ = clientset.NetworkingV1().NetworkPolicies(tenantTargetName).Update(context.TODO(), objectFactory.NewNetworkPolicy(args[0], tenantName), metav1.UpdateOptions{})
 		} else {
 			s.Stop()
 			fmt.Println("More than one Network policy detected! ignoring..")
@@ -115,15 +115,15 @@ var updateTenantTargetCmd = &cobra.Command{
 		}
 
 		//Create current role scheme to update namespace
-		role := objectFactory.NewRole(args[0])
+		role := objectFactory.NewRole(tenantTargetName)
 
 		//Apply changes
-		_, err = clientset.CoreV1().ResourceQuotas(args[0]).Update(context.TODO(), quota, metav1.UpdateOptions{})
+		_, err = clientset.CoreV1().ResourceQuotas(tenantTargetName).Update(context.TODO(), quota, metav1.UpdateOptions{})
 		if err != nil {
 			s.Stop()
 			tools.HandleError(err, cmd)
 		}
-		_, err = clientset.RbacV1().Roles(args[0]).Update(context.TODO(), role, metav1.UpdateOptions{})
+		_, err = clientset.RbacV1().Roles(tenantTargetName).Update(context.TODO(), role, metav1.UpdateOptions{})
 		if err != nil {
 			s.Stop()
 			tools.HandleError(err, cmd)
