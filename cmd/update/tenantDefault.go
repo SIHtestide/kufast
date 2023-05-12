@@ -15,7 +15,7 @@ var updateTenantDefaultCmd = &cobra.Command{
 	Long:  `Set a new default tenant-target for a tenant. The target must be valid for this tenant.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if len(args) != 2 {
+		if len(args) != 1 {
 			tools.HandleError(errors.New(tools.ERROR_WRONG_NUMBER_ARGUMENTS), cmd)
 		}
 
