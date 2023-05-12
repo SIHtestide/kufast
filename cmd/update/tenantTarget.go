@@ -17,7 +17,7 @@ import (
 
 // updateTenantTargetCmd represents the update tenant-target command
 var updateTenantTargetCmd = &cobra.Command{
-	Use:   "tenant-target <tenant target>",
+	Use:   "tenant-target <tenant-target>",
 	Short: "Update memory, CPU and storage capabilities of a tenant target.",
 	Long: "Update memory, CPU and storage capabilities of a tenant target. " +
 		"Also updates the role scheme to the latest version of kufast.",
@@ -136,7 +136,7 @@ var updateTenantTargetCmd = &cobra.Command{
 		}
 
 		s.Stop()
-		fmt.Println("Complete!")
+		fmt.Println(tools.MESSAGE_DONE)
 
 	},
 }

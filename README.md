@@ -21,6 +21,7 @@ of Kubernetes.
 To compile the application please install go on your computer (e.g. through your package manager.)
 
 ### Build the Application
+To build the application you need at least golang 1.19 installed to your computer.
 Then build the application by running
 ```bash
 go build kufast
