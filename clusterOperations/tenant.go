@@ -8,6 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kufast/objectFactory"
 	"kufast/tools"
+	"time"
 )
 
 // CreateTenant creates a new tenant. All parameters are drawn from the environment on the command line.
@@ -34,6 +35,20 @@ func CreateTenant(tenantName string, cmd *cobra.Command) error {
 		return err
 	}
 
+	timeout := 20
+	for true {
+		timeout--
+
+		if timeout == 0 {
+			return errors.New("operation timeout. Your tenant has still been created. Please ensure it is fully" +
+				" initialized and get his credentials from 'kufast get tenant-creds'")
+		}
+		tenant, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
+		time.Sleep(time.Millisecond * 250)
+		if err != nil && tenant.Secrets != nil && len(tenant.Secrets) > 0 {
+			break
+		}
+	}
 	return nil
 }
 

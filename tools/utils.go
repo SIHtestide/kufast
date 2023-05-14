@@ -82,6 +82,7 @@ func WriteNewUserYamlToFile(tenantName string, cmd *cobra.Command, s *spinner.Sp
 	if errUser != nil {
 		return err
 	}
+
 	secret, errSecret := clientset.CoreV1().Secrets("default").Get(context.TODO(), tenant.Secrets[0].Name, metav1.GetOptions{})
 	if errSecret != nil {
 		return err
