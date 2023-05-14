@@ -75,7 +75,6 @@ var getTenantTargetCmd = &cobra.Command{
 		t.AppendRow(table.Row{"Used CPU", quota.Status.Used.Cpu()})
 		t.AppendRow(table.Row{"Used Memory", quota.Status.Used.Memory()})
 		t.AppendRow(table.Row{"Used Storage", quota.Status.Used.Storage()})
-		t.AppendRow(table.Row{"Available Storage", "to be implemented"})
 		t.AppendSeparator()
 		t.AppendRow(table.Row{"# Pods", len(pods.Items)})
 		t.AppendSeparator()

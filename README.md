@@ -1,6 +1,6 @@
 # kufast
 A small tool for creating Multi Tenant environments in Kubernetes and deploy standard Docker deployments to it.
-
+Check out [our docu](https://github.com/Stefuniverse/kufast/wiki) for more details.
 # Features
 Kufast allows you to build a fast multi tenant environment on your Kubernetes cluster just by 
 leveraging the default capabilities of Kubernetes. The tool is designed in a way that make it
@@ -42,12 +42,15 @@ specify your credentials with each command by passing the `-k` flag.
 ### (Admin only) Enable PodNodeSelector Admission Plugin
 If you intend to use the limitation feature of tenant-target (see concepts), you need to enable the 
 [admission controller "PodNodeSelector"](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector)
- in your Kubernetes. In a default k8s installation you can do that by modifing the Kubernetes API Server
-Manifest as shown below:
+ in your Kubernetes cluster. In a default k8s installation you can do that by modifying the Kubernetes API Server
+manifest as shown below:
 ```bash
 #add ,PodNodeSelector to the --enableadmission-plugin flag
 vim /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
+The PodNodeSelector-admission controller will check every new pods desired deployment node and
+denies the deployment, if the node does not match with the policies set on the namespace or within the
+controller.
 ### (Admin only) Install a CNI
 If you want to separate nodes with network policies, a [CNI](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/) needs to be installed
 to your Kubernetes Cluster. The plugin must be able to understand generic Kubernetes
@@ -72,6 +75,8 @@ kufast create pod nginx nginx --target w2 -k ./tenant1.kubeconfig --cpu 200m --m
 And that is all it takes to create your first container in your tenant. Next, try to setup
 a container from your private docker registry or create a pod group as a new depoyment target. More information
 about how to do this can be found in the concept section.
+
+More advanced and sophisticated examples can be found in [our docu](https://github.com/Stefuniverse/kufast/wiki).
 # Concepts
 The deployment tool introduces some arbitrary concepts to Kubernetes that should be understood
 by the administrator of the Kubernetes instance, where kufast is used.
@@ -79,15 +84,15 @@ Other concepts are working as known from Kubernetes.
 
 ### Tenants
 A tenant is actually just a ServiceAccount user to be created in your default namespace.
- Upon creation, the user cannot do anything, except getting his own information.
-To do this, the user gets a role and a role-binding within the default namespace.
+Upon creation, the user cannot do anything, except getting his own information.
+To do this, the user gets a role and a role-binding within the default namespace. However, you can expand a tenant with
+tenant-targets to give it permissions to deploy pods to multiple nodes within your cluster.
 ### Targets
 Targets are places, a tenant can theoretically deploy to, if the right is assigned to him. A target is either a single node or 
 a group of nodes. Group of nodes are also referred to as target-groups
 ### Tenant-targets
 A tenant target gives the tenant the right to deploy pods to a certain target. The tenant-target is a namespace in Kubernetes that can be limited by ResourceQoutas,
-LimitRanges, Network Policies and to which node they can deploy, thanks to the PodNodeSelector
-admission controller.
+LimitRanges, Network Policies and to which node they can deploy to.
 ### Deploy-secrets
 If a tenant wishes to deploy from a private registry, he needs a deploy-secret. This
 secret is created by reading a dockerconfig into a secret, through `kufast create deploy-secret`.

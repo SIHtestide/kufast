@@ -145,8 +145,8 @@ func DeleteSecret(secretName string, cmd *cobra.Command) <-chan string {
 		for true {
 			_, err := clientset.CoreV1().Secrets(namespaceName).Get(context.TODO(), secretName, metav1.GetOptions{})
 			if err != nil {
-				r <- err.Error()
-				return
+				r <- ""
+				break
 			}
 			time.Sleep(time.Millisecond * 250)
 		}

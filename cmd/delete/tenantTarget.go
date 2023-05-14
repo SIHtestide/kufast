@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"kufast/clusterOperations"
 	"kufast/tools"
@@ -47,12 +46,6 @@ Please use with care! Deleted data cannot be restored.`,
 			s.Prefix = tools.MESSAGE_DELETE_OBJECTS
 			s.Start()
 
-			user, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
-			if err != nil {
-				s.Stop()
-				tools.HandleError(err, cmd)
-			}
-
 			var results []int
 
 			for _, tenantTargetName := range args {
@@ -79,12 +72,6 @@ Please use with care! Deleted data cannot be restored.`,
 				}
 			}
 
-			_, err = clientset.CoreV1().ServiceAccounts("default").Update(context.TODO(), user, metav1.UpdateOptions{})
-			if err != nil {
-				s.Stop()
-				fmt.Println(err)
-				s.Start()
-			}
 			s.Stop()
 			fmt.Println(tools.MESSAGE_DONE)
 
