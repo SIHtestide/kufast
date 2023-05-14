@@ -32,7 +32,7 @@ func init() {
 
 func CreateRootDocs(linkH func(string) string) {
 	os.MkdirAll("./kufast.wiki", 0770)
-	out, err := os.Create("./kufast.wiki/Home.md")
+	out, err := os.Create("./kufast.wiki/root.md")
 	if err != nil {
 		return
 	}

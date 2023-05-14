@@ -16,7 +16,7 @@ import l "kufast/cmd/list"
 import u "kufast/cmd/update"
 
 func main() {
-	if os.Args[1] == "gen-docu" {
+	if len(os.Args) > 1 && os.Args[1] == "gen-docu" {
 		generateMdDocs()
 	} else {
 		cmd.Execute()
