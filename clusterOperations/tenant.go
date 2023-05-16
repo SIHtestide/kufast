@@ -40,8 +40,8 @@ func CreateTenant(tenantName string, cmd *cobra.Command) error {
 		timeout--
 
 		if timeout == 0 {
-			return errors.New("operation timeout. Your tenant has still been created. Please ensure it is fully" +
-				" initialized and get his credentials from 'kufast get tenant-creds'")
+			return errors.New(`Operation Timeout. Your tenant has been initialized but it is not ready yet. 
+Please ensure it is fully initialized and get its credentials from 'kufast get tenant-creds'`)
 		}
 		tenant, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
 		time.Sleep(time.Millisecond * 1000)
