@@ -35,7 +35,7 @@ func CreateTenant(tenantName string, cmd *cobra.Command) error {
 		return err
 	}
 
-	timeout := 20
+	timeout := 600
 	for true {
 		timeout--
 
@@ -44,7 +44,7 @@ func CreateTenant(tenantName string, cmd *cobra.Command) error {
 				" initialized and get his credentials from 'kufast get tenant-creds'")
 		}
 		tenant, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
-		time.Sleep(time.Millisecond * 250)
+		time.Sleep(time.Millisecond * 1000)
 		if err != nil && tenant.Secrets != nil && len(tenant.Secrets) > 0 {
 			break
 		}
