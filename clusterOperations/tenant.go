@@ -45,8 +45,10 @@ Please ensure it is fully initialized and get its credentials from 'kufast get t
 		}
 		tenant, err := clientset.CoreV1().ServiceAccounts("default").Get(context.TODO(), tenantName+"-user", metav1.GetOptions{})
 		time.Sleep(time.Millisecond * 1000)
-		if err != nil && tenant.Secrets != nil && len(tenant.Secrets) > 0 {
+		if err == nil && tenant.Secrets != nil && len(tenant.Secrets) > 0 {
 			break
+		} else if err != nil {
+			return err
 		}
 	}
 	return nil
