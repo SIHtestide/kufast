@@ -22,6 +22,10 @@ To compile the application please install go on your computer (e.g. through your
 
 ### Build the Application
 To build the application you need at least golang 1.19 installed to your computer.
+Install golang by running (Ubuntu 22.04 LTS):
+```bash
+sudo snap install go --classic
+```
 Then build the application by running
 ```bash
 go build kufast
