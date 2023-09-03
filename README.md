@@ -30,6 +30,17 @@ Then build the application by running
 ```bash
 go build kufast
 ```
+
+### Run Tests
+To run the tests (after building the kufast executable!), please change the variable "targetNode" in the script beforehand towards one of your k8s worker nodes.
+Then set your tests.sh as an executable file by running:
+```bash
+chmod +x tests.sh
+```
+Afterwards run the test by running:
+```bash
+./tests.sh
+```
 ### (Optional) Set the Application to your PATH
 Afterwards, you can set the binary to your PATH e.g. on Linux by running:
 ```bash
