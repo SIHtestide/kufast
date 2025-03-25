@@ -32,7 +32,7 @@ import (
 )
 
 // createPodCmd represents the create pod command
-var createPodCmd = &cobra.Command{
+var createPodCmds = &cobra.Command{
 	Use:   "pod <name> <image>",
 	Short: "Create a new pod within a tenant-target",
 	Long: `Creates a new pod within a tenant-target. A pod is like a shell for a container in Kuebrnetes. 
@@ -90,19 +90,19 @@ func createPodInteractive(cmd *cobra.Command) []string {
 
 // init is a helper function from cobra to initialize the command. It sets all flags, standard values and documentation for this command.
 func init() {
-	createCmd.AddCommand(createPodCmd)
+	createCmds.AddCommand(createPodCmds)
 
 	//Settings for the pod
-	createPodCmd.Flags().BoolP("keep-alive", "", false, "Pod will be restarted upon termination.")
-	createPodCmd.Flags().StringP("memory", "", "500Mi", "The amount of RAM the pod can use")
-	createPodCmd.Flags().StringP("cpu", "", "500m", "The amount of CPU the pod can use")
-	createPodCmd.Flags().StringP("storage", "", "1Gi", "The amount of storage the pod can use")
-	createPodCmd.Flags().StringP("deploy-secret", "d", "", "The name of the deployment secret to deploy this container. This secret will be used to pull the image.")
-	createPodCmd.Flags().StringArrayP("secrets", "s", []string{}, "List of secret names to be introduced in the container "+
+	createPodCmds.Flags().BoolP("keep-alive", "", false, "Pod will be restarted upon termination.")
+	createPodCmds.Flags().StringP("memory", "", "500Mi", "The amount of RAM the pod can use")
+	createPodCmds.Flags().StringP("cpu", "", "500m", "The amount of CPU the pod can use")
+	createPodCmds.Flags().StringP("storage", "", "1Gi", "The amount of storage the pod can use")
+	createPodCmds.Flags().StringP("deploy-secret", "d", "", "The name of the deployment secret to deploy this container. This secret will be used to pull the image.")
+	createPodCmds.Flags().StringArrayP("secrets", "s", []string{}, "List of secret names to be introduced in the container "+
 		"as environment variables. The variable name will equal the name of the secret. Can be specified multiple times.")
-	createPodCmd.Flags().Int32SliceP("port", "p", []int32{}, "A port the pod should expose. Can be specified multiple times.")
-	createPodCmd.Flags().StringArrayP("cmd", "", []string{}, "An initial command to be issued at pod start. Required by a few containers.")
+	createPodCmds.Flags().Int32SliceP("port", "p", []int32{}, "A port the pod should expose. Can be specified multiple times.")
+	createPodCmds.Flags().StringArrayP("cmd", "", []string{}, "An initial command to be issued at pod start. Required by a few containers.")
 
-	createPodCmd.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
-	createPodCmd.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
+	createPodCmds.Flags().StringP("target", "", "", tools.DOCU_FLAG_TARGET)
+	createPodCmds.Flags().StringP("tenant", "", "", tools.DOCU_FLAG_TENANT)
 }
